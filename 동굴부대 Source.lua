@@ -2,9 +2,9 @@
 -- [[
 
         원본:
-            loadstring(game:HttpGet'https://luauscript-9njmj869.manus.space/api/projects/2640001/server-loader')()
+        loadstring(game:HttpGet'https://luauscript-9njmj869.manus.space/api/projects/2640001/server-loader')()
         
-    ]]
+]]
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
