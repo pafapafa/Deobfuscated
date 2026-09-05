@@ -3,7 +3,7 @@
 
         원본:
         loadstring(game:HttpGet'https://raw.githubusercontent.com/HalmuValk/Free/refs/heads/main/refs/heads/main/loader.lua')()
-        
+
 ]]
 
 --
