@@ -8,7 +8,7 @@
 
 --
 
-local HI_SKID=(type(newproxy)=="function" and newproxy()) or {}
+local HI_SKID = (type(newproxy) == "function" and newproxy()) or {}
 
 --
 
