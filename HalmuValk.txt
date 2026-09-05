@@ -1,0 +1,4995 @@
+--!nocheck
+--[[
+
+        원본:
+        loadstring(game:HttpGet'https://raw.githubusercontent.com/HalmuValk/Free/refs/heads/main/refs/heads/main/loader.lua')()
+        
+]]
+
+--
+
+local HI_SKID=(type(newproxy)=="function" and newproxy()) or {}
+
+--
+
+pcall(function()
+    local Players = game:GetService('Players')
+    local RS = game:GetService('ReplicatedStorage')
+    local LP = Players.LocalPlayer
+    local CoreGui = game:GetService('CoreGui')
+    local StarterGui = game:GetService('StarterGui')
+    local LogService = game:GetService('LogService')
+    local ScriptContext = game:GetService('ScriptContext')
+    local GuiService = game:GetService('GuiService')
+
+    pcall(function()
+        if LP and typeof(LP.Kick) == 'function' then
+            local oldKick = LP.Kick
+
+            LP.Kick = function(...) end
+        end
+    end)
+    pcall(function()
+        if not hookmetamethod or not getnamecallmethod then
+            return
+        end
+
+        local bannedRemoteNames = {
+            kick = true,
+            ban = true,
+            punish = true,
+            anticheat = true,
+            detect = true,
+            report = true,
+            flag = true,
+            crash = true,
+            log = true,
+            screenshot = true,
+            security = true,
+            mod = true,
+            admin = true,
+            watchdog = true,
+            sentinel = true,
+        }
+
+        local function isSuspiciousName(n)
+            if type(n) ~= 'string' then
+                return false
+            end
+
+            n = string.lower(n)
+
+            for k, _ in pairs(bannedRemoteNames)do
+                if string.find(n, k, 1, true) then
+                    return true
+                end
+            end
+
+            return false
+        end
+
+        local old
+
+        old = hookmetamethod(game, '__namecall', newcclosure and newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+
+            if method == 'FireServer' or method == 'InvokeServer' then
+                local name = ''
+
+                pcall(function()
+                    name = self.Name
+                end)
+
+                if isSuspiciousName(name) then
+                    return
+                end
+
+                local path = ''
+
+                pcall(function()
+                    path = self:GetFullName()
+                end)
+
+                if isSuspiciousName(path) then
+                    return
+                end
+            end
+            if method == 'Kick' or method == 'kick' then
+                return
+            end
+
+            return old(self, ...)
+        end) or function(self, ...)
+            local method = getnamecallmethod()
+
+            if method == 'FireServer' or method == 'InvokeServer' then
+                local name = ''
+
+                pcall(function()
+                    name = self.Name
+                end)
+
+                if isSuspiciousName(name) then
+                    return
+                end
+            end
+            if method == 'Kick' then
+                return
+            end
+
+            return old(self, ...)
+        end)
+    end)
+    pcall(function()
+        local function cloak(inst)
+            if not inst then
+                return
+            end
+
+            pcall(function()
+                inst.Name = tostring(math.random(100000, 999999))
+            end)
+        end
+
+        task.defer(function()
+            task.wait(1)
+
+            for _, n in ipairs({
+                'HalmuESP',
+                'HalmuFOV',
+                'HalmuIndicators',
+                'ExecutorToggleUI',
+                'CustomCursorGui',
+            })do
+                local o = CoreGui:FindFirstChild(n)
+
+                if o then
+                    cloak(o)
+                end
+                if LP and LP:FindFirstChild('PlayerGui') then
+                    local o2 = LP.PlayerGui:FindFirstChild(n)
+
+                    if o2 then
+                        cloak(o2)
+                    end
+                end
+            end
+        end)
+    end)
+    pcall(function()
+        if ScriptContext and ScriptContext.Error then
+            ScriptContext.Error:Connect(function() end)
+        end
+    end)
+    pcall(function()
+        if getconnections then
+        end
+    end)
+    pcall(function()
+        if setfflag then
+            pcall(setfflag, 'DebugRunServiceHumanoidCheck', 'False')
+        end
+    end)
+    pcall(function()
+        local RunService = game:GetService('RunService')
+        local last = 0
+
+        RunService.Heartbeat:Connect(function()
+            if tick() - last < 1 then
+                return
+            end
+
+            last = tick()
+
+            local char = LP.Character
+            local hrp = char and char:FindFirstChild('HumanoidRootPart')
+
+            if hrp and hrp.SetNetworkOwner then
+                pcall(function()
+                    hrp:SetNetworkOwner(LP)
+                end)
+            end
+        end)
+    end)
+end)
+
+local o0q='I-'
+
+local nexlib = {
+    accentclr = Color3.fromRGB(128, 213, 247),
+    dropdownframes = {},
+    colorpickerframes = {},
+}
+local o0o='am-s'
+
+local mouseButtonNames = {
+    [Enum.UserInputType.MouseButton1] = 'M1',
+    [Enum.UserInputType.MouseButton2] = 'M2',
+    [Enum.UserInputType.MouseButton3] = 'M3',
+}
+local hjk='ki'
+
+local disallowedKeyCodes = {
+    Enum.KeyCode.Unknown,
+    Enum.KeyCode.W,
+    Enum.KeyCode.A,
+    Enum.KeyCode.S,
+    Enum.KeyCode.D,
+    Enum.KeyCode.Up,
+    Enum.KeyCode.Left,
+    Enum.KeyCode.Down,
+    Enum.KeyCode.Right,
+    Enum.KeyCode.Slash,
+    Enum.KeyCode.Tab,
+    Enum.KeyCode.Backspace,
+    Enum.KeyCode.Escape,
+    Enum.KeyCode.RightShift,
+}
+
+local ftq='der'
+
+local function tableContains(tbl, value)
+    for k, value2 in next, tbl do
+        if value2 == value or k == value then
+            return true
+        end
+    end
+end
+local nvm=o0q..o0o..hjk..ftq
+
+local function makeDraggable(clickObject, dragObject)
+    pcall(function()
+        local isDragging = false
+        local dragInput, dragStartPosition, dragStartGuiPosition
+
+        clickObject.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                isDragging = true
+                dragStartPosition = input.Position
+                dragStartGuiPosition = dragObject.Position
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        isDragging = false
+                    end
+                end)
+            end
+        end)
+        clickObject.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+        game:GetService('UserInputService').InputChanged:Connect(function(input)
+            if input == dragInput and isDragging then
+                local dragDelta = input.Position - dragStartPosition
+
+                dragObject.Position = UDim2.new(dragStartGuiPosition.X.Scale, dragStartGuiPosition.X.Offset + dragDelta.X, dragStartGuiPosition.Y.Scale, dragStartGuiPosition.Y.Offset + dragDelta.Y)
+            end
+        end)
+    end)
+end
+
+local mainScreenGui = Instance.new('ScreenGui')
+
+mainScreenGui.Name = 'nexlib'
+setthreadidentity = setthreadidentity or function() end
+
+setthreadidentity(8)
+
+mainScreenGui.Parent = game:GetService('CoreGui')
+mainScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local customCursorGui = Instance.new('ScreenGui')
+
+customCursorGui.Name = 'CustomCursorGui'
+customCursorGui.ResetOnSpawn = false
+customCursorGui.Parent = mainScreenGui
+
+local cursorDot = Instance.new('Frame')
+
+cursorDot.Name = 'CursorBox'
+cursorDot.Size = UDim2.new(0, 6, 0, 6)
+cursorDot.BackgroundColor3 = Color3.fromRGB(128, 213, 247)
+cursorDot.BorderSizePixel = 0
+cursorDot.Visible = false
+cursorDot.Parent = customCursorGui
+
+local notificationContainer = Instance.new('Folder')
+
+notificationContainer.Name = 'NotificationFolder'
+notificationContainer.Parent = mainScreenGui
+
+local notifications = {}
+local notificationHeight = 22
+local notificationSpacing = 6
+local maxNotifications = 8
+local defaultNotificationDuration = 3
+local notificationTopOffset = 40
+
+local function refreshNotifications()
+    local tweenService = game:GetService('TweenService')
+
+    for i, record in ipairs(notifications)do
+        if record.bar and record.bar.Parent then
+            local notificationY = notificationTopOffset + (i - 1) * (notificationHeight + notificationSpacing)
+
+            tweenService:Create(record.bar, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0.5, 0, 0, notificationY),
+            }):Play()
+        end
+    end
+end
+
+function nexlib:Notification(title, desc, duration)
+    duration = duration or defaultNotificationDuration
+
+    local notificationText = tostring(title or '')
+
+    if desc and desc ~= '' then
+        notificationText = notificationText .. '  \u{b7}  ' .. tostring(desc)
+    end
+
+    local tweenService = game:GetService('TweenService')
+
+    while#notifications >= maxNotifications do
+        local oldNotification = table.remove(notifications)
+
+        if oldNotification and oldNotification.bar and oldNotification.bar.Parent then
+            local labelFadeOut = tweenService:Create(oldNotification.label, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1})
+            local collapseTween = tweenService:Create(oldNotification.bar, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+                Size = UDim2.new(0, 0, 0, notificationHeight),
+                BackgroundTransparency = 1,
+            })
+            local strokeFadeTween = tweenService:Create(oldNotification.stroke, TweenInfo.new(0.2), {Transparency = 1})
+
+            labelFadeOut:Play()
+            collapseTween:Play()
+            strokeFadeTween:Play()
+            collapseTween.Completed:Connect(function()
+                pcall(function()
+                    if oldNotification.bar then
+                        oldNotification.bar:Destroy()
+                    end
+                end)
+                refreshNotifications()
+            end)
+        end
+    end
+
+    local notificationBar = Instance.new('Frame')
+
+    notificationBar.Name = 'Notification'
+    notificationBar.Parent = notificationContainer
+    notificationBar.AnchorPoint = Vector2.new(0.5, 0)
+    notificationBar.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+    notificationBar.BorderSizePixel = 0
+    notificationBar.Position = UDim2.new(0.5, 0, 0, notificationTopOffset)
+    notificationBar.Size = UDim2.new(0, 0, 0, notificationHeight)
+    notificationBar.ClipsDescendants = true
+    notificationBar.BackgroundTransparency = 0.05
+    notificationBar.ZIndex = 100
+
+    local notificationStroke = Instance.new('UIStroke')
+
+    notificationStroke.Parent = notificationBar
+    notificationStroke.Color = nexlib.accentclr
+    notificationStroke.Thickness = 1.5
+    notificationStroke.Transparency = 0.25
+
+    local notificationAccent = Instance.new('Frame')
+
+    notificationAccent.Name = 'AccentLine'
+    notificationAccent.Parent = notificationBar
+    notificationAccent.BackgroundColor3 = nexlib.accentclr
+    notificationAccent.BorderSizePixel = 0
+    notificationAccent.Size = UDim2.new(0, 3, 1, 0)
+    notificationAccent.Position = UDim2.new(0, 0, 0, 0)
+
+    local label = Instance.new('TextLabel')
+
+    label.Parent = notificationBar
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0, 14, 0, 0)
+    label.Size = UDim2.new(1, -28, 1, 0)
+    label.Font = Enum.Font.Code
+    label.Text = notificationText
+    label.TextColor3 = Color3.fromRGB(230, 230, 230)
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    label.TextTransparency = 1
+    label.TextTruncate = Enum.TextTruncate.None
+
+    local textService = game:GetService('TextService')
+    local textBounds = textService:GetTextSize(notificationText, 13, Enum.Font.Code, Vector2.new(2000, notificationHeight))
+    local notificationWidth = math.clamp(textBounds.X + 48, 200, 480)
+
+    table.insert(notifications, 1, {
+        bar = notificationBar,
+        label = label,
+        stroke = notificationStroke,
+    })
+    refreshNotifications()
+
+    local expandTween = tweenService:Create(notificationBar, TweenInfo.new(0.28, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, notificationWidth, 0, notificationHeight),
+    })
+    local labelFadeIn = tweenService:Create(label, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0})
+
+    expandTween:Play()
+    task.delay(0.08, function()
+        labelFadeIn:Play()
+    end)
+    task.delay(duration, function()
+        for i, record in ipairs(notifications)do
+            if record.bar == notificationBar then
+                table.remove(notifications, i)
+
+                break
+            end
+        end
+
+        if not notificationBar or not notificationBar.Parent then
+            refreshNotifications()
+
+            return
+        end
+
+        local labelFadeOut = tweenService:Create(label, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1})
+        local collapseTween = tweenService:Create(notificationBar, TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, notificationHeight),
+            BackgroundTransparency = 1,
+        })
+        local strokeFadeTween = tweenService:Create(notificationStroke, TweenInfo.new(0.22), {Transparency = 1})
+
+        labelFadeOut:Play()
+        collapseTween:Play()
+        strokeFadeTween:Play()
+        collapseTween.Completed:Connect(function()
+            pcall(function()
+                notificationBar:Destroy()
+            end)
+            refreshNotifications()
+        end)
+    end)
+end
+function nexlib:Window(windowTitle)
+    local windowVisible = true
+    local hasSelectedTab = false
+    local tabs = {}
+    local windowFrame = Instance.new('Frame')
+    local S = Instance.new('ImageLabel')
+    local windowInnerShadow = Instance.new('ImageLabel')
+    local contentFrame = Instance.new('Frame')
+    local tabBar = Instance.new('ScrollingFrame')
+    local tabLayout = Instance.new('UIListLayout')
+    local tabPadding = Instance.new('UIPadding')
+    local titleBar = Instance.new('Frame')
+    local windowTitleLabel = Instance.new('TextLabel')
+    local titleAccent = Instance.new('Frame')
+
+    windowFrame.Name = 'MainFrame'
+    windowFrame.Parent = mainScreenGui
+    windowFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    windowFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    windowFrame.BackgroundTransparency = 0.15
+    windowFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
+    windowFrame.BorderSizePixel = 0
+    windowFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    windowFrame.Size = UDim2.new(0, 525, 0, 631)
+    windowFrame.Visible = false
+    windowFrame.ClipsDescendants = true
+    S.Name = 'OutlineMainFrame1'
+    S.Parent = windowFrame
+    S.BackgroundTransparency = 1
+    S.Position = UDim2.new(0, 1, 0, 1)
+    S.Size = UDim2.new(1, -2, 1, -2)
+    S.Image = 'rbxassetid://2592362371'
+    S.ImageColor3 = Color3.fromRGB(60, 60, 60)
+    S.ScaleType = Enum.ScaleType.Slice
+    S.SliceCenter = Rect.new(2, 2, 62, 62)
+    windowInnerShadow.Name = 'OutlineMainFrame2'
+    windowInnerShadow.Parent = windowFrame
+    windowInnerShadow.BackgroundTransparency = 1
+    windowInnerShadow.Size = UDim2.new(1, 0, 1, 0)
+    windowInnerShadow.Image = 'rbxassetid://2592362371'
+    windowInnerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    windowInnerShadow.ScaleType = Enum.ScaleType.Slice
+    windowInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+    contentFrame.Name = 'ContainerHolderFrame'
+    contentFrame.Parent = windowFrame
+    contentFrame.AnchorPoint = Vector2.new(0.5, 0)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    contentFrame.Position = UDim2.new(0.5, 0, 0.071, 10)
+    contentFrame.Size = UDim2.new(1, -18, 1, -42)
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.ClipsDescendants = true
+    tabBar.Name = 'TabHolderFrame'
+    tabBar.Parent = contentFrame
+    tabBar.BackgroundTransparency = 1
+    tabBar.Size = UDim2.new(1, 0, 0, 32)
+    tabBar.Visible = true
+    tabBar.CanvasSize = UDim2.new(0, 700, 0, 0)
+    tabBar.ScrollBarThickness = 0
+    tabLayout.Name = 'TabHolderFrameLayout'
+    tabLayout.Parent = tabBar
+    tabLayout.FillDirection = Enum.FillDirection.Horizontal
+    tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabLayout.Padding = UDim.new(0, 4)
+    tabPadding.Name = 'TabHolderFramePadding'
+    tabPadding.Parent = tabBar
+    tabPadding.PaddingLeft = UDim.new(0, 5)
+    titleBar.Name = 'TopBar'
+    titleBar.Parent = windowFrame
+    titleBar.AnchorPoint = Vector2.new(0.5, 0)
+    titleBar.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    titleBar.BorderSizePixel = 0
+    titleBar.Position = UDim2.new(0.5, 0, 0, 2)
+    titleBar.Size = UDim2.new(1, -5, 0, 28)
+    windowTitleLabel.Name = 'TopBarTitle'
+    windowTitleLabel.Parent = titleBar
+    windowTitleLabel.BackgroundTransparency = 1
+    windowTitleLabel.Position = UDim2.new(0, 7, 0, 5)
+    windowTitleLabel.Size = UDim2.new(0, 0, 0, 16)
+    windowTitleLabel.Font = Enum.Font.Code
+    windowTitleLabel.Text = windowTitle
+    windowTitleLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+    windowTitleLabel.TextSize = 16
+    windowTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleAccent.Name = 'TopBarLine'
+    titleAccent.Parent = titleBar
+    titleAccent.BackgroundColor3 = nexlib.accentclr
+    titleAccent.BorderSizePixel = 0
+    titleAccent.Position = UDim2.new(0, 0, 0, 27)
+    titleAccent.Size = UDim2.new(1, 0, 0, 1)
+
+    makeDraggable(titleBar, windowFrame)
+
+    local lighting = game:GetService('Lighting')
+    local uiBlur = lighting:FindFirstChild('ValkUIBlur') or Instance.new('BlurEffect')
+
+    uiBlur.Name = 'ValkUIBlur'
+    uiBlur.Size = 0
+    uiBlur.Parent = lighting
+
+    local function updateWindowVisibility()
+        windowFrame.Visible = windowVisible
+        cursorDot.Visible = windowVisible
+        game:GetService('UserInputService').MouseBehavior = windowVisible and Enum.MouseBehavior.Default or Enum.MouseBehavior.LockCenter
+
+        local tweenService = game:GetService('TweenService')
+
+        if windowVisible then
+            tweenService:Create(uiBlur, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 18}):Play()
+
+            windowFrame.BackgroundTransparency = 1
+
+            tweenService:Create(windowFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.15}):Play()
+        else
+            tweenService:Create(uiBlur, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 0}):Play()
+        end
+    end
+
+    game:GetService('UserInputService').InputBegan:Connect(function(input, processed)
+        if input.KeyCode == Enum.KeyCode.RightShift then
+            windowVisible = not windowVisible
+
+            updateWindowVisibility()
+        end
+    end)
+
+    local coreGui = game:GetService('CoreGui')
+
+    if coreGui:FindFirstChild('ExecutorToggleUI') then
+        coreGui.ExecutorToggleUI:Destroy()
+    end
+
+    local toggleGui = Instance.new('ScreenGui')
+
+    toggleGui.Name = 'ExecutorToggleUI'
+    toggleGui.ResetOnSpawn = false
+    toggleGui.Parent = coreGui
+
+    local toggleButton = Instance.new('TextButton')
+
+    toggleButton.Name = 'ToggleFrame'
+    toggleButton.Size = UDim2.new(0, 65, 0, 36)
+    toggleButton.Position = UDim2.new(0, 20, 0, 20)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Active = true
+    toggleButton.Draggable = true
+    toggleButton.Parent = toggleGui
+
+    local toggleButtonStroke = Instance.new('UIStroke')
+
+    toggleButtonStroke.Color = nexlib.accentclr
+    toggleButtonStroke.Thickness = 2
+    toggleButtonStroke.Parent = toggleButton
+
+    local toggleTitle = Instance.new('TextLabel')
+
+    toggleTitle.Size = UDim2.new(1, -6, 0, 16)
+    toggleTitle.Position = UDim2.new(0, 3, 0, 2)
+    toggleTitle.BackgroundTransparency = 1
+    toggleTitle.Text = 'Toggle'
+    toggleTitle.TextColor3 = Color3.fromRGB(230, 230, 230)
+    toggleTitle.TextSize = 12
+    toggleTitle.Font = Enum.Font.GothamBold
+    toggleTitle.TextXAlignment = Enum.TextXAlignment.Left
+    toggleTitle.Parent = toggleButton
+
+    local toggleSubtitle = Instance.new('TextLabel')
+
+    toggleSubtitle.Size = UDim2.new(1, -6, 0, 16)
+    toggleSubtitle.Position = UDim2.new(0, 3, 0, 18)
+    toggleSubtitle.BackgroundTransparency = 1
+    toggleSubtitle.Text = 'Look'
+    toggleSubtitle.TextColor3 = Color3.fromRGB(230, 230, 230)
+    toggleSubtitle.TextSize = 12
+    toggleSubtitle.Font = Enum.Font.GothamBold
+    toggleSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+    toggleSubtitle.Parent = toggleButton
+
+    toggleButton.MouseButton1Click:Connect(function()
+        windowVisible = not windowVisible
+
+        updateWindowVisibility()
+    end)
+    coroutine.wrap(function()
+        while task.wait() do
+            titleAccent.BackgroundColor3 = nexlib.accentclr
+            toggleButtonStroke.Color = nexlib.accentclr
+            cursorDot.BackgroundColor3 = nexlib.accentclr
+
+            if windowVisible then
+                local mousePosition = game:GetService('UserInputService'):GetMouseLocation()
+
+                cursorDot.Position = UDim2.new(0, mousePosition.X, 0, mousePosition.Y)
+            end
+        end
+    end)()
+
+    local windowApi = {}
+
+    function windowApi:Tab(tabName)
+        local sectionZIndex = 50
+        local tabButton = Instance.new('TextButton')
+
+        tabButton.Name = tabName .. '_TabBtn'
+        tabButton.Parent = tabBar
+        tabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        tabButton.BorderSizePixel = 0
+        tabButton.Font = Enum.Font.Code
+        tabButton.Text = tabName
+        tabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+        tabButton.TextSize = 14
+        tabButton.AutoButtonColor = false
+
+        local textService = game:GetService('TextService')
+        local tabTextBounds = textService:GetTextSize(tabName, 14, Enum.Font.Code, Vector2.new(500, 500))
+
+        tabButton.Size = UDim2.new(0, tabTextBounds.X + 28, 0, 26)
+
+        local tabAccentLine = Instance.new('Frame')
+
+        tabAccentLine.Name = 'TopLine'
+        tabAccentLine.Parent = tabButton
+        tabAccentLine.BackgroundColor3 = nexlib.accentclr
+        tabAccentLine.BorderSizePixel = 0
+        tabAccentLine.Position = UDim2.new(0, 0, 0, 0)
+        tabAccentLine.Size = UDim2.new(1, 0, 0, 2)
+        tabAccentLine.Visible = false
+
+        local tabOutline = Instance.new('ImageLabel')
+
+        tabOutline.Name = 'Outline'
+        tabOutline.Parent = tabButton
+        tabOutline.BackgroundTransparency = 1
+        tabOutline.Size = UDim2.new(1, 0, 1, 0)
+        tabOutline.Image = 'rbxassetid://2592362371'
+        tabOutline.ImageColor3 = Color3.fromRGB(45, 45, 45)
+        tabOutline.ScaleType = Enum.ScaleType.Slice
+        tabOutline.SliceCenter = Rect.new(2, 2, 62, 62)
+
+        local leftColumn = Instance.new('ScrollingFrame')
+        local leftPadding = Instance.new('UIPadding')
+        local leftLayout = Instance.new('UIListLayout')
+        local rightColumn = Instance.new('ScrollingFrame')
+        local rightPadding = Instance.new('UIPadding')
+        local rightLayout = Instance.new('UIListLayout')
+
+        leftColumn.Name = tabName .. '_Holder1'
+        leftColumn.Parent = contentFrame
+        leftColumn.Active = true
+        leftColumn.BackgroundTransparency = 1
+        leftColumn.BorderSizePixel = 0
+        leftColumn.Position = UDim2.new(0, 1, 0, 35)
+        leftColumn.Size = UDim2.new(0, 245, 1, -40)
+        leftColumn.Visible = false
+        leftColumn.CanvasSize = UDim2.new(0, 0, 0, 0)
+        leftColumn.ScrollBarThickness = 4
+        leftColumn.ScrollingEnabled = true
+        leftPadding.Parent = leftColumn
+        leftPadding.PaddingTop = UDim.new(0, 5)
+        leftLayout.Parent = leftColumn
+        leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        leftLayout.Padding = UDim.new(0, 10)
+        rightColumn.Name = tabName .. '_Holder2'
+        rightColumn.Parent = contentFrame
+        rightColumn.Active = true
+        rightColumn.BackgroundTransparency = 1
+        rightColumn.BorderSizePixel = 0
+        rightColumn.Position = UDim2.new(0, 255, 0, 35)
+        rightColumn.Size = UDim2.new(0, 245, 1, -40)
+        rightColumn.Visible = false
+        rightColumn.CanvasSize = UDim2.new(0, 0, 0, 0)
+        rightColumn.ScrollBarThickness = 4
+        rightColumn.ScrollingEnabled = true
+        rightPadding.Parent = rightColumn
+        rightPadding.PaddingTop = UDim.new(0, 5)
+        rightLayout.Parent = rightColumn
+        rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        rightLayout.Padding = UDim.new(0, 10)
+
+        table.insert(tabs, {
+            btn = tabButton,
+            topLine = tabAccentLine,
+            outline = tabOutline,
+            h1 = leftColumn,
+            h2 = rightColumn,
+        })
+
+        if hasSelectedTab == false then
+            hasSelectedTab = true
+            leftColumn.Visible = true
+            rightColumn.Visible = true
+            tabButton.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+            tabButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+            tabAccentLine.Visible = true
+            tabOutline.ImageColor3 = Color3.fromRGB(65, 65, 65)
+        end
+
+        tabButton.MouseButton1Click:Connect(function()
+            local tweenService = game:GetService('TweenService')
+
+            for _, t in ipairs(tabs)do
+                if t.btn == tabButton then
+                    tweenService:Create(t.btn, TweenInfo.new(0.12, Enum.EasingStyle.Quad), {
+                        BackgroundColor3 = Color3.fromRGB(33, 33, 33),
+                        TextColor3 = Color3.fromRGB(230, 230, 230),
+                    }):Play()
+
+                    t.topLine.Visible = true
+                    t.outline.ImageColor3 = Color3.fromRGB(65, 65, 65)
+                    t.h1.Visible = true
+                    t.h2.Visible = true
+                else
+                    tweenService:Create(t.btn, TweenInfo.new(0.12, Enum.EasingStyle.Quad), {
+                        BackgroundColor3 = Color3.fromRGB(22, 22, 22),
+                        TextColor3 = Color3.fromRGB(150, 150, 150),
+                    }):Play()
+
+                    t.topLine.Visible = false
+                    t.outline.ImageColor3 = Color3.fromRGB(45, 45, 45)
+                    t.h1.Visible = false
+                    t.h2.Visible = false
+                end
+            end
+        end)
+        coroutine.wrap(function()
+            while task.wait() do
+                if tabAccentLine.Visible then
+                    tabAccentLine.BackgroundColor3 = nexlib.accentclr
+                end
+            end
+        end)()
+
+        local tabApi = {}
+
+        function tabApi:Section(sectionName, forceSide)
+            sectionZIndex = sectionZIndex - 1
+
+            local sectionParent = nil
+
+            if forceSide == 1 then
+                sectionParent = leftColumn
+            elseif forceSide == 2 then
+                sectionParent = rightColumn
+            else
+                local leftSectionCount = 0
+                local rightSectionCount = 0
+
+                for s, f in next, leftColumn:GetChildren()do
+                    if f.Name == 'Section' or f.Name == 'MultiSection' then
+                        leftSectionCount = leftSectionCount + 1
+                    end
+                end
+                for s, f in next, rightColumn:GetChildren()do
+                    if f.Name == 'Section' or f.Name == 'MultiSection' then
+                        rightSectionCount = rightSectionCount + 1
+                    end
+                end
+
+                if leftSectionCount == 0 and rightSectionCount == 0 then
+                    sectionParent = leftColumn
+                elseif leftSectionCount == rightSectionCount then
+                    sectionParent = leftColumn
+                else
+                    sectionParent = rightColumn
+                end
+            end
+
+            local sectionFrame = Instance.new('Frame')
+            local sectionShadow = Instance.new('ImageLabel')
+            local sectionOutline = Instance.new('ImageLabel')
+            local sectionTitleBackground = Instance.new('Frame')
+            local sectionTitle = Instance.new('TextLabel')
+            local sectionContent = Instance.new('Frame')
+            local sectionLayout = Instance.new('UIListLayout')
+
+            sectionFrame.Name = 'Section'
+            sectionFrame.Parent = sectionParent
+            sectionFrame.AnchorPoint = Vector2.new(0.5, 0)
+            sectionFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            sectionFrame.BorderSizePixel = 0
+            sectionFrame.Size = UDim2.new(1, -2, 0, 24)
+            sectionFrame.ZIndex = sectionZIndex
+            sectionShadow.Name = 'SectionOutline2'
+            sectionShadow.Parent = sectionFrame
+            sectionShadow.BackgroundTransparency = 1
+            sectionShadow.Size = UDim2.new(1, 0, 1, 0)
+            sectionShadow.Image = 'rbxassetid://2592362371'
+            sectionShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+            sectionShadow.ScaleType = Enum.ScaleType.Slice
+            sectionShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+            sectionOutline.Name = 'SectionOutline1'
+            sectionOutline.Parent = sectionFrame
+            sectionOutline.BackgroundTransparency = 1
+            sectionOutline.Position = UDim2.new(0, 1, 0, 1)
+            sectionOutline.Size = UDim2.new(1, -2, 1, -2)
+            sectionOutline.Image = 'rbxassetid://2592362371'
+            sectionOutline.ImageColor3 = Color3.fromRGB(60, 60, 60)
+            sectionOutline.ScaleType = Enum.ScaleType.Slice
+            sectionOutline.SliceCenter = Rect.new(2, 2, 62, 62)
+            sectionTitleBackground.Name = 'SectionTitleFrame'
+            sectionTitleBackground.Parent = sectionFrame
+            sectionTitleBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            sectionTitleBackground.BorderSizePixel = 0
+            sectionTitleBackground.Position = UDim2.new(0, 10, 0, 0)
+            sectionTitle.Name = 'SectionTitle'
+            sectionTitle.Parent = sectionTitleBackground
+            sectionTitle.BackgroundTransparency = 1
+            sectionTitle.Position = UDim2.new(0, 0, 0, -3)
+            sectionTitle.Size = UDim2.new(1, 0, 0, 7)
+            sectionTitle.Font = Enum.Font.Code
+            sectionTitle.Text = sectionName
+            sectionTitle.TextColor3 = Color3.fromRGB(230, 230, 230)
+            sectionTitle.TextSize = 14
+            sectionContent.Name = 'SectionItemHolderFrame'
+            sectionContent.Parent = sectionFrame
+            sectionContent.AnchorPoint = Vector2.new(0.5, 0)
+            sectionContent.BackgroundTransparency = 1
+            sectionContent.Position = UDim2.new(0.5, 0, 0, 15)
+            sectionContent.Size = UDim2.new(1, -16, 0, 0)
+            sectionLayout.Parent = sectionContent
+            sectionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            sectionLayout.Padding = UDim.new(0, 5)
+            sectionTitleBackground.Size = UDim2.new(0, sectionTitle.TextBounds.X + 6, 0, 7)
+
+            local function updateSectionSize()
+                sectionFrame.Size = UDim2.new(1, -2, 0, sectionLayout.AbsoluteContentSize.Y + 24)
+                leftColumn.CanvasSize = UDim2.new(0, 0, 0, leftLayout.AbsoluteContentSize.Y + 20)
+                rightColumn.CanvasSize = UDim2.new(0, 0, 0, rightLayout.AbsoluteContentSize.Y + 20)
+            end
+
+            local sectionApi = {}
+
+            function sectionApi:Toggle(text, default, callback)
+                local toggleButton2 = Instance.new('TextButton')
+                local toggleShadow = Instance.new('ImageLabel')
+                local toggleInnerShadow = Instance.new('ImageLabel')
+                local toggleBox = Instance.new('Frame')
+                local toggleIndicator = Instance.new('Frame')
+                local toggleLabel = Instance.new('TextLabel')
+
+                toggleButton2.Name = 'Toggle'
+                toggleButton2.Parent = sectionContent
+                toggleButton2.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                toggleButton2.BorderSizePixel = 0
+                toggleButton2.Size = UDim2.new(1, 0, 0, 22)
+                toggleButton2.AutoButtonColor = false
+                toggleButton2.Text = ''
+                toggleShadow.Parent = toggleButton2
+                toggleShadow.BackgroundTransparency = 1
+                toggleShadow.Size = UDim2.new(1, 0, 1, 0)
+                toggleShadow.Image = 'rbxassetid://2592362371'
+                toggleShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                toggleShadow.ScaleType = Enum.ScaleType.Slice
+                toggleShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+                toggleInnerShadow.Parent = toggleButton2
+                toggleInnerShadow.BackgroundTransparency = 1
+                toggleInnerShadow.Position = UDim2.new(0, 1, 0, 1)
+                toggleInnerShadow.Size = UDim2.new(1, -2, 1, -2)
+                toggleInnerShadow.Image = 'rbxassetid://2592362371'
+                toggleInnerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                toggleInnerShadow.ScaleType = Enum.ScaleType.Slice
+                toggleInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+                toggleBox.Name = 'Box'
+                toggleBox.Parent = toggleButton2
+                toggleBox.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+                toggleBox.BorderSizePixel = 0
+                toggleBox.Position = UDim2.new(0, 6, 0.5, -6)
+                toggleBox.Size = UDim2.new(0, 12, 0, 12)
+                toggleIndicator.Name = 'Check'
+                toggleIndicator.Parent = toggleBox
+                toggleIndicator.BackgroundColor3 = nexlib.accentclr
+                toggleIndicator.BorderSizePixel = 0
+                toggleIndicator.Position = UDim2.new(0, 2, 0, 2)
+                toggleIndicator.Size = UDim2.new(0, 8, 0, 8)
+                toggleIndicator.Visible = default or false
+                toggleLabel.Parent = toggleButton2
+                toggleLabel.BackgroundTransparency = 1
+                toggleLabel.Position = UDim2.new(0, 25, 0, 0)
+                toggleLabel.Size = UDim2.new(1, -25, 1, 0)
+                toggleLabel.Font = Enum.Font.Code
+                toggleLabel.Text = text
+                toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+                toggleLabel.TextSize = 14
+                toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+                local toggleState = default or false
+
+                toggleButton2.MouseButton1Click:Connect(function()
+                    toggleState = not toggleState
+                    toggleIndicator.Visible = toggleState
+
+                    pcall(callback, toggleState)
+                end)
+                updateSectionSize()
+                coroutine.wrap(function()
+                    while task.wait() do
+                        toggleIndicator.BackgroundColor3 = nexlib.accentclr
+                    end
+                end)()
+
+                local toggleApi = {}
+
+                function toggleApi:Set(value)
+                    toggleState = value
+                    toggleIndicator.Visible = toggleState
+
+                    pcall(callback, toggleState)
+                end
+
+                return toggleApi
+            end
+            function sectionApi:Button(text, callback)
+                local button = Instance.new('TextButton')
+                local buttonShadow = Instance.new('ImageLabel')
+                local buttonInnerShadow = Instance.new('ImageLabel')
+
+                button.Name = 'Button'
+                button.Parent = sectionContent
+                button.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                button.BorderColor3 = nexlib.accentclr
+                button.BorderSizePixel = 0
+                button.Size = UDim2.new(1, 0, 0, 20)
+                button.AutoButtonColor = false
+                button.Font = Enum.Font.Code
+                button.TextColor3 = Color3.fromRGB(230, 230, 230)
+                button.TextSize = 14
+                button.Text = text
+                buttonShadow.Name = 'ButtonOutline1'
+                buttonShadow.Parent = button
+                buttonShadow.BackgroundTransparency = 1
+                buttonShadow.Size = UDim2.new(1, 0, 1, 0)
+                buttonShadow.Image = 'rbxassetid://2592362371'
+                buttonShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                buttonShadow.ScaleType = Enum.ScaleType.Slice
+                buttonShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+                buttonInnerShadow.Name = 'ButtonOutline2'
+                buttonInnerShadow.Parent = button
+                buttonInnerShadow.BackgroundTransparency = 1
+                buttonInnerShadow.Position = UDim2.new(0, 1, 0, 1)
+                buttonInnerShadow.Size = UDim2.new(1, -2, 1, -2)
+                buttonInnerShadow.Image = 'rbxassetid://2592362371'
+                buttonInnerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                buttonInnerShadow.ScaleType = Enum.ScaleType.Slice
+                buttonInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+                button.MouseButton1Click:Connect(function()
+                    pcall(callback)
+                end)
+                button.MouseEnter:Connect(function()
+                    button.BorderSizePixel = 1
+                end)
+                button.MouseLeave:Connect(function()
+                    button.BorderSizePixel = 0
+                end)
+                updateSectionSize()
+                coroutine.wrap(function()
+                    while task.wait() do
+                        button.BorderColor3 = nexlib.accentclr
+                    end
+                end)()
+            end
+            function sectionApi:Slider(text, min, max, default, rounding, callback)
+                local sliderButton = Instance.new('TextButton')
+                local sliderFill = Instance.new('Frame')
+                local sliderLabel = Instance.new('TextLabel')
+                local sliderValueLabel = Instance.new('TextLabel')
+
+                sliderButton.Name = 'SliderBar'
+                sliderButton.Parent = sectionContent
+                sliderButton.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                sliderButton.BorderSizePixel = 0
+                sliderButton.Size = UDim2.new(1, 0, 0, 16)
+                sliderButton.Text = ''
+                sliderButton.AutoButtonColor = false
+
+                local sliderShadow = Instance.new('ImageLabel')
+
+                sliderShadow.Parent = sliderButton
+                sliderShadow.BackgroundTransparency = 1
+                sliderShadow.Size = UDim2.new(1, 0, 1, 0)
+                sliderShadow.Image = 'rbxassetid://2592362371'
+                sliderShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                sliderShadow.ScaleType = Enum.ScaleType.Slice
+                sliderShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+                local sliderInnerShadow = Instance.new('ImageLabel')
+
+                sliderInnerShadow.Parent = sliderButton
+                sliderInnerShadow.BackgroundTransparency = 1
+                sliderInnerShadow.Position = UDim2.new(0, 1, 0, 1)
+                sliderInnerShadow.Size = UDim2.new(1, -2, 1, -2)
+                sliderInnerShadow.Image = 'rbxassetid://2592362371'
+                sliderInnerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                sliderInnerShadow.ScaleType = Enum.ScaleType.Slice
+                sliderInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+                sliderFill.Name = 'SliderFill'
+                sliderFill.Parent = sliderButton
+                sliderFill.BackgroundColor3 = nexlib.accentclr
+                sliderFill.BorderSizePixel = 0
+                sliderFill.BackgroundTransparency = 0.55
+                sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+                sliderLabel.Name = 'SliderTitle'
+                sliderLabel.Parent = sliderButton
+                sliderLabel.BackgroundTransparency = 1
+                sliderLabel.Position = UDim2.new(0, 6, 0, 0)
+                sliderLabel.Size = UDim2.new(0.7, 0, 1, 0)
+                sliderLabel.Font = Enum.Font.Code
+                sliderLabel.Text = text
+                sliderLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+                sliderLabel.TextSize = 13
+                sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+                sliderLabel.ZIndex = 2
+                sliderValueLabel.Name = 'SliderValue'
+                sliderValueLabel.Parent = sliderButton
+                sliderValueLabel.BackgroundTransparency = 1
+                sliderValueLabel.Position = UDim2.new(1, -75, 0, 0)
+                sliderValueLabel.Size = UDim2.new(0, 70, 1, 0)
+                sliderValueLabel.Font = Enum.Font.Code
+                sliderValueLabel.Text = tostring(default) .. 's'
+                sliderValueLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+                sliderValueLabel.TextSize = 13
+                sliderValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+                sliderValueLabel.ZIndex = 5
+
+                local isDragging = false
+
+                local function updateSliderFromInput(input)
+                    local sliderPercent = math.clamp((input.Position.X - sliderButton.AbsolutePosition.X) / sliderButton.AbsoluteSize.X, 0, 1)
+                    local value = min + (max - min) * sliderPercent
+
+                    if rounding == 0 then
+                        value = math.floor(value + 0.5)
+                    else
+                        value = tonumber(string.format('%.' .. rounding .. 'f', value))
+                    end
+
+                    sliderFill.Size = UDim2.new(sliderPercent, 0, 1, 0)
+                    sliderValueLabel.Text = tostring(value) .. 's'
+
+                    pcall(callback, value)
+                end
+
+                sliderButton.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        isDragging = true
+
+                        updateSliderFromInput(input)
+                    end
+                end)
+                game:GetService('UserInputService').InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        isDragging = false
+                    end
+                end)
+                game:GetService('UserInputService').InputChanged:Connect(function(input)
+                    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                        updateSliderFromInput(input)
+                    end
+                end)
+                updateSectionSize()
+                coroutine.wrap(function()
+                    while task.wait() do
+                        sliderFill.BackgroundColor3 = nexlib.accentclr
+                    end
+                end)()
+            end
+            function sectionApi:Input(text, default, placeholder, callback)
+                local inputFrame = Instance.new('Frame')
+                local inputTitleLabel = Instance.new('TextLabel')
+                local inputBox = Instance.new('TextBox')
+
+                inputFrame.Name = 'Input'
+                inputFrame.Parent = sectionContent
+                inputFrame.BackgroundTransparency = 1
+                inputFrame.Size = UDim2.new(1, 0, 0, 38)
+                inputTitleLabel.Name = 'InputTitle'
+                inputTitleLabel.Parent = inputFrame
+                inputTitleLabel.BackgroundTransparency = 1
+                inputTitleLabel.Size = UDim2.new(1, 0, 0, 15)
+                inputTitleLabel.Font = Enum.Font.Code
+                inputTitleLabel.Text = text
+                inputTitleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+                inputTitleLabel.TextSize = 14
+                inputTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+                inputBox.Name = 'InputBox'
+                inputBox.Parent = inputFrame
+                inputBox.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                inputBox.BorderSizePixel = 0
+                inputBox.Position = UDim2.new(0, 0, 0, 18)
+                inputBox.Size = UDim2.new(1, 0, 0, 20)
+                inputBox.Font = Enum.Font.Code
+                inputBox.PlaceholderText = placeholder or ''
+                inputBox.Text = default or ''
+                inputBox.TextColor3 = Color3.fromRGB(230, 230, 230)
+                inputBox.TextSize = 14
+                inputBox.TextXAlignment = Enum.TextXAlignment.Left
+
+                inputBox.FocusLost:Connect(function(enterPressed)
+                    pcall(callback, inputBox.Text)
+                end)
+                updateSectionSize()
+            end
+            function sectionApi:Dropdown(text, list, default, callback)
+                default = typeof(default) == 'string' and default
+
+                if default == '' then
+                    default = nil
+                end
+
+                local dropdownFrame = Instance.new('Frame')
+                local dropdownLabel = Instance.new('TextLabel')
+                local dropdownButton = Instance.new('TextButton')
+                local dropdownInnerShadow = Instance.new('ImageLabel')
+                local dropdownArrow = Instance.new('ImageLabel')
+                local dropdownValueLabel = Instance.new('TextLabel')
+                local dropdownListShadow = Instance.new('ImageLabel')
+
+                dropdownFrame.Name = 'Dropdown'
+                dropdownFrame.Parent = sectionContent
+                dropdownFrame.BackgroundTransparency = 1
+                dropdownFrame.Size = UDim2.new(1, 0, 0, 37)
+                dropdownLabel.Name = 'DropdownTitle'
+                dropdownLabel.Parent = dropdownFrame
+                dropdownLabel.BackgroundTransparency = 1
+                dropdownLabel.Size = UDim2.new(0, 0, 0, 13)
+                dropdownLabel.Font = Enum.Font.Code
+                dropdownLabel.Text = text
+                dropdownLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+                dropdownLabel.TextSize = 14
+                dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+                dropdownButton.Name = 'DropdownFrame'
+                dropdownButton.Parent = dropdownFrame
+                dropdownButton.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                dropdownButton.BorderSizePixel = 0
+                dropdownButton.Position = UDim2.new(0, 0, 1, -20)
+                dropdownButton.Size = UDim2.new(1, 0, 0, 20)
+                dropdownButton.Text = ''
+                dropdownButton.AutoButtonColor = false
+                dropdownInnerShadow.Parent = dropdownButton
+                dropdownInnerShadow.BackgroundTransparency = 1
+                dropdownInnerShadow.Size = UDim2.new(1, 0, 1, 0)
+                dropdownInnerShadow.Image = 'rbxassetid://2592362371'
+                dropdownInnerShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                dropdownInnerShadow.ScaleType = Enum.ScaleType.Slice
+                dropdownInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+                dropdownArrow.Parent = dropdownButton
+                dropdownArrow.BackgroundTransparency = 1
+                dropdownArrow.Position = UDim2.new(0, 1, 0, 1)
+                dropdownArrow.Size = UDim2.new(1, -2, 1, -2)
+                dropdownArrow.Image = 'rbxassetid://2592362371'
+                dropdownArrow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                dropdownArrow.ScaleType = Enum.ScaleType.Slice
+                dropdownArrow.SliceCenter = Rect.new(2, 2, 62, 62)
+                dropdownValueLabel.Name = 'DropdownText'
+                dropdownValueLabel.Parent = dropdownButton
+                dropdownValueLabel.BackgroundTransparency = 1
+                dropdownValueLabel.Position = UDim2.new(0, 5, 0, 0)
+                dropdownValueLabel.Size = UDim2.new(1, -5, 1, 0)
+                dropdownValueLabel.Font = Enum.Font.Code
+                dropdownValueLabel.Text = typeof(default) == 'string' and default or '...'
+                dropdownValueLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+                dropdownValueLabel.TextSize = 14
+                dropdownValueLabel.TextXAlignment = Enum.TextXAlignment.Left
+                dropdownListShadow.Name = 'DropdownArrow'
+                dropdownListShadow.Parent = dropdownButton
+                dropdownListShadow.AnchorPoint = Vector2.new(0, 0.5)
+                dropdownListShadow.BackgroundTransparency = 1
+                dropdownListShadow.Position = UDim2.new(1, -22, 0.5, 0)
+                dropdownListShadow.Size = UDim2.new(0, 20, 0, 20)
+                dropdownListShadow.Image = 'http://www.roblox.com/asset/?id=6031091004'
+                dropdownListShadow.ImageColor3 = Color3.fromRGB(180, 180, 180)
+
+                updateSectionSize()
+
+                local dropdownHolderFrame = Instance.new('Frame')
+                local dropdownHolderShadow = Instance.new('ImageLabel')
+                local dropdownList = Instance.new('ImageLabel')
+                local dropdownScroll = Instance.new('ScrollingFrame')
+                local dropdownLayout = Instance.new('UIListLayout')
+                local dropdownPadding = Instance.new('UIPadding')
+
+                dropdownHolderFrame.Name = 'DropdownHolderFrame'
+                dropdownHolderFrame.Parent = sectionFrame
+                dropdownHolderFrame.AnchorPoint = Vector2.new(0.5, 0)
+                dropdownHolderFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                dropdownHolderFrame.BorderSizePixel = 0
+                dropdownHolderFrame.Position = UDim2.new(0.5, 0, 0, sectionLayout.AbsoluteContentSize.Y + 19)
+                dropdownHolderFrame.Size = UDim2.new(1, -16, 0, 0)
+                dropdownHolderFrame.Visible = false
+                dropdownHolderFrame.ZIndex = 10
+                dropdownHolderShadow.Parent = dropdownHolderFrame
+                dropdownHolderShadow.BackgroundTransparency = 1
+                dropdownHolderShadow.Size = UDim2.new(1, 0, 1, 0)
+                dropdownHolderShadow.Image = 'rbxassetid://2592362371'
+                dropdownHolderShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                dropdownHolderShadow.ScaleType = Enum.ScaleType.Slice
+                dropdownHolderShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+                dropdownList.Parent = dropdownHolderFrame
+                dropdownList.BackgroundTransparency = 1
+                dropdownList.Position = UDim2.new(0, 1, 0, 1)
+                dropdownList.Size = UDim2.new(1, -2, 1, -2)
+                dropdownList.Image = 'rbxassetid://2592362371'
+                dropdownList.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                dropdownList.ScaleType = Enum.ScaleType.Slice
+                dropdownList.SliceCenter = Rect.new(2, 2, 62, 62)
+                dropdownScroll.Name = 'DropdownHolder'
+                dropdownScroll.Parent = dropdownHolderFrame
+                dropdownScroll.Active = true
+                dropdownScroll.BackgroundTransparency = 1
+                dropdownScroll.BorderSizePixel = 0
+                dropdownScroll.Size = UDim2.new(1, -4, 1, 0)
+                dropdownScroll.ScrollBarThickness = 2
+                dropdownScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+                dropdownLayout.Parent = dropdownScroll
+                dropdownLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                dropdownLayout.Padding = UDim.new(0, 2)
+                dropdownPadding.Parent = dropdownScroll
+                dropdownPadding.PaddingTop = UDim.new(0, 6)
+
+                table.insert(nexlib.dropdownframes, dropdownHolderFrame)
+                table.insert(nexlib.dropdownframes, dropdownFrame)
+
+                local dropdownApi = {}
+
+                dropdownButton.MouseButton1Click:Connect(function()
+                    if dropdownHolderFrame.Visible == false then
+                        for s, f in next, nexlib.dropdownframes do
+                            if f.Name == 'DropdownHolderFrame' then
+                                f.Visible = false
+                            end
+                        end
+                        for s, f in next, nexlib.dropdownframes do
+                            if f.Name == 'Dropdown' then
+                                f.DropdownFrame.DropdownArrow.Rotation = 0
+                            end
+                        end
+
+                        dropdownListShadow.Rotation = 180
+                        dropdownHolderFrame.Visible = true
+                    else
+                        dropdownListShadow.Rotation = 0
+                        dropdownHolderFrame.Visible = false
+                    end
+                end)
+
+                for s, f in next, list do
+                    local dropdownOptionButton = Instance.new('TextButton')
+                    local optionLabel = Instance.new('TextLabel')
+
+                    dropdownOptionButton.Name = 'Item'
+                    dropdownOptionButton.Parent = dropdownScroll
+                    dropdownOptionButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                    dropdownOptionButton.Size = UDim2.new(1, -12, 0, 20)
+                    dropdownOptionButton.AutoButtonColor = false
+                    dropdownOptionButton.Font = Enum.Font.Code
+                    dropdownOptionButton.Text = ' ' .. f
+                    dropdownOptionButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+                    dropdownOptionButton.TextSize = 14
+                    dropdownOptionButton.TextXAlignment = Enum.TextXAlignment.Left
+                    optionLabel.Name = 'ItemText'
+                    optionLabel.Parent = dropdownOptionButton
+                    optionLabel.BackgroundTransparency = 1
+                    optionLabel.Position = UDim2.new(0, 7, 0, 0)
+                    optionLabel.Size = UDim2.new(1, -7, 1, 0)
+                    optionLabel.Font = Enum.Font.Code
+                    optionLabel.Text = f
+                    optionLabel.TextColor3 = nexlib.accentclr
+                    optionLabel.TextSize = 14
+                    optionLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+                    dropdownOptionButton.MouseButton1Click:Connect(function()
+                        dropdownHolderFrame.Visible = false
+                        dropdownValueLabel.Text = f
+                        default = f
+
+                        pcall(callback, f)
+                    end)
+                    coroutine.wrap(function()
+                        while task.wait() do
+                            local isDefaultOption = (typeof(default) == 'string' and default == f)
+
+                            optionLabel.BackgroundTransparency = 1
+                            optionLabel.TextTransparency = isDefaultOption and 0 or 1
+                            dropdownOptionButton.TextTransparency = isDefaultOption and 1 or 0
+                            dropdownOptionButton.BackgroundTransparency = isDefaultOption and 0 or 1
+                            dropdownOptionButton.BorderColor3 = nexlib.accentclr
+                        end
+                    end)()
+
+                    dropdownHolderFrame.Size = UDim2.new(1, -16, 0, math.clamp(dropdownLayout.AbsoluteContentSize.Y + 12, 0, 150))
+                    dropdownScroll.CanvasSize = UDim2.new(0, 0, 0, dropdownLayout.AbsoluteContentSize.Y + 12)
+                end
+
+                coroutine.wrap(function()
+                    while task.wait() do
+                        dropdownButton.BorderColor3 = nexlib.accentclr
+                    end
+                end)()
+
+                function dropdownApi:Set(value)
+                    dropdownValueLabel.Text = tostring(value)
+                    default = value
+
+                    pcall(callback, value)
+                end
+
+                return dropdownApi
+            end
+            function sectionApi:Label(text)
+                local labelApi = {}
+                local label = Instance.new('TextLabel')
+
+                label.Name = 'Label'
+                label.Parent = sectionContent
+                label.BackgroundTransparency = 1
+                label.Size = UDim2.new(1, 0, 0, 18)
+                label.Font = Enum.Font.Code
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(230, 230, 230)
+                label.TextSize = 14
+                label.TextXAlignment = Enum.TextXAlignment.Left
+
+                updateSectionSize()
+
+                function labelApi:Change(newText)
+                    label.Text = newText
+                end
+
+                return labelApi
+            end
+
+            return sectionApi
+        end
+        function tabApi:MultiSection(tabNames, forceSide)
+            sectionZIndex = sectionZIndex - 1
+
+            local sectionParent = nil
+
+            if forceSide == 1 then
+                sectionParent = leftColumn
+            elseif forceSide == 2 then
+                sectionParent = rightColumn
+            else
+                local leftSectionCount, rightSectionCount = 0, 0
+
+                for _, f in next, leftColumn:GetChildren()do
+                    if f.Name == 'Section' or f.Name == 'MultiSection' then
+                        leftSectionCount = leftSectionCount + 1
+                    end
+                end
+                for _, f in next, rightColumn:GetChildren()do
+                    if f.Name == 'Section' or f.Name == 'MultiSection' then
+                        rightSectionCount = rightSectionCount + 1
+                    end
+                end
+
+                if leftSectionCount <= rightSectionCount then
+                    sectionParent = leftColumn
+                else
+                    sectionParent = rightColumn
+                end
+            end
+
+            local multiSectionFrame = Instance.new('Frame')
+
+            multiSectionFrame.Name = 'MultiSection'
+            multiSectionFrame.Parent = sectionParent
+            multiSectionFrame.AnchorPoint = Vector2.new(0.5, 0)
+            multiSectionFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            multiSectionFrame.BorderSizePixel = 0
+            multiSectionFrame.Size = UDim2.new(1, -2, 0, 50)
+            multiSectionFrame.ZIndex = sectionZIndex
+
+            local multiSectionShadow = Instance.new('ImageLabel')
+
+            multiSectionShadow.Parent = multiSectionFrame
+            multiSectionShadow.BackgroundTransparency = 1
+            multiSectionShadow.Size = UDim2.new(1, 0, 1, 0)
+            multiSectionShadow.Image = 'rbxassetid://2592362371'
+            multiSectionShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+            multiSectionShadow.ScaleType = Enum.ScaleType.Slice
+            multiSectionShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+            local multiSectionInnerShadow = Instance.new('ImageLabel')
+
+            multiSectionInnerShadow.Parent = multiSectionFrame
+            multiSectionInnerShadow.BackgroundTransparency = 1
+            multiSectionInnerShadow.Position = UDim2.new(0, 1, 0, 1)
+            multiSectionInnerShadow.Size = UDim2.new(1, -2, 1, -2)
+            multiSectionInnerShadow.Image = 'rbxassetid://2592362371'
+            multiSectionInnerShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+            multiSectionInnerShadow.ScaleType = Enum.ScaleType.Slice
+            multiSectionInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+            local multiSectionTabBar = Instance.new('Frame')
+
+            multiSectionTabBar.Parent = multiSectionFrame
+            multiSectionTabBar.BackgroundTransparency = 1
+            multiSectionTabBar.Position = UDim2.new(0, 6, 0, 4)
+            multiSectionTabBar.Size = UDim2.new(1, -12, 0, 22)
+
+            local multiSectionTabLayout = Instance.new('UIListLayout')
+
+            multiSectionTabLayout.Parent = multiSectionTabBar
+            multiSectionTabLayout.FillDirection = Enum.FillDirection.Horizontal
+            multiSectionTabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            multiSectionTabLayout.Padding = UDim.new(0, 2)
+
+            local multiSectionList = Instance.new('Frame')
+
+            multiSectionList.Parent = multiSectionFrame
+            multiSectionList.BackgroundTransparency = 1
+            multiSectionList.Position = UDim2.new(0.5, 0, 0, 28)
+            multiSectionList.AnchorPoint = Vector2.new(0.5, 0)
+            multiSectionList.Size = UDim2.new(1, -16, 0, 0)
+
+            local multiSectionPages, multiSectionTabRecords = {}, {}
+            local multiSectionTabs = {}
+
+            local function refreshMultiSection()
+                local maxPageHeight = 0
+
+                for _, multiSectionContent in ipairs(multiSectionPages)do
+                    local pageLayout = multiSectionContent:FindFirstChildOfClass('UIListLayout')
+
+                    if pageLayout then
+                        maxPageHeight = math.max(maxPageHeight, pageLayout.AbsoluteContentSize.Y)
+                    end
+                end
+
+                multiSectionList.Size = UDim2.new(1, -16, 0, maxPageHeight)
+                multiSectionFrame.Size = UDim2.new(1, -2, 0, maxPageHeight + 36)
+                leftColumn.CanvasSize = UDim2.new(0, 0, 0, leftLayout.AbsoluteContentSize.Y + 20)
+                rightColumn.CanvasSize = UDim2.new(0, 0, 0, rightLayout.AbsoluteContentSize.Y + 20)
+            end
+
+            for i, tabName in ipairs(tabNames)do
+                local multiSectionContent = Instance.new('Frame')
+
+                multiSectionContent.Name = 'Page_' .. tabName
+                multiSectionContent.Parent = multiSectionList
+                multiSectionContent.BackgroundTransparency = 1
+                multiSectionContent.Size = UDim2.new(1, 0, 0, 0)
+                multiSectionContent.Visible = (i == 1)
+
+                local pageLayout = Instance.new('UIListLayout')
+
+                pageLayout.Parent = multiSectionContent
+                pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                pageLayout.Padding = UDim.new(0, 5)
+
+                pageLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+                    multiSectionContent.Size = UDim2.new(1, 0, 0, pageLayout.AbsoluteContentSize.Y)
+
+                    refreshMultiSection()
+                end)
+
+                local button = Instance.new('TextButton')
+
+                button.Parent = multiSectionTabBar
+                button.BackgroundColor3 = (i == 1) and Color3.fromRGB(38, 38, 38) or Color3.fromRGB(28, 28, 28)
+                button.BorderSizePixel = 0
+                button.Size = UDim2.new(0, 0, 1, 0)
+                button.AutomaticSize = Enum.AutomaticSize.X
+                button.AutoButtonColor = false
+                button.Font = Enum.Font.Code
+                button.Text = '  ' .. tabName .. '  '
+                button.TextColor3 = (i == 1) and Color3.fromRGB(230, 230, 230) or Color3.fromRGB(150, 150, 150)
+                button.TextSize = 13
+
+                local tabUnderline = Instance.new('Frame')
+
+                tabUnderline.Parent = button
+                tabUnderline.BackgroundColor3 = nexlib.accentclr
+                tabUnderline.BorderSizePixel = 0
+                tabUnderline.Position = UDim2.new(0, 0, 1, -2)
+                tabUnderline.Size = UDim2.new(1, 0, 0, 2)
+                tabUnderline.Visible = (i == 1)
+
+                table.insert(multiSectionPages, multiSectionContent)
+                table.insert(multiSectionTabRecords, {
+                    btn = button,
+                    underline = tabUnderline,
+                    page = multiSectionContent,
+                })
+                button.MouseButton1Click:Connect(function()
+                    for idx, record in ipairs(multiSectionTabRecords)do
+                        local isSelectedPage = (idx == i)
+
+                        record.page.Visible = isSelectedPage
+                        record.underline.Visible = isSelectedPage
+                        record.btn.BackgroundColor3 = isSelectedPage and Color3.fromRGB(38, 38, 38) or Color3.fromRGB(28, 28, 28)
+                        record.btn.TextColor3 = isSelectedPage and Color3.fromRGB(230, 230, 230) or Color3.fromRGB(150, 150, 150)
+                    end
+
+                    refreshMultiSection()
+                end)
+                coroutine.wrap(function()
+                    while task.wait() do
+                        if tabUnderline.Visible then
+                            tabUnderline.BackgroundColor3 = nexlib.accentclr
+                        end
+                    end
+                end)()
+
+                local function refreshMultiTabs()
+                    multiSectionContent.Size = UDim2.new(1, 0, 0, pageLayout.AbsoluteContentSize.Y)
+
+                    refreshMultiSection()
+                end
+
+                local pageApi = {}
+
+                function pageApi:Toggle(text, default, callback)
+                    local toggleButton2 = Instance.new('TextButton')
+
+                    toggleButton2.Name = 'Toggle'
+                    toggleButton2.Parent = multiSectionContent
+                    toggleButton2.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                    toggleButton2.BorderSizePixel = 0
+                    toggleButton2.Size = UDim2.new(1, 0, 0, 22)
+                    toggleButton2.AutoButtonColor = false
+                    toggleButton2.Text = ''
+
+                    local toggleShadow = Instance.new('ImageLabel')
+
+                    toggleShadow.Parent = toggleButton2
+                    toggleShadow.BackgroundTransparency = 1
+                    toggleShadow.Size = UDim2.new(1, 0, 1, 0)
+                    toggleShadow.Image = 'rbxassetid://2592362371'
+                    toggleShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                    toggleShadow.ScaleType = Enum.ScaleType.Slice
+                    toggleShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+                    local toggleInnerShadow = Instance.new('ImageLabel')
+
+                    toggleInnerShadow.Parent = toggleButton2
+                    toggleInnerShadow.BackgroundTransparency = 1
+                    toggleInnerShadow.Position = UDim2.new(0, 1, 0, 1)
+                    toggleInnerShadow.Size = UDim2.new(1, -2, 1, -2)
+                    toggleInnerShadow.Image = 'rbxassetid://2592362371'
+                    toggleInnerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                    toggleInnerShadow.ScaleType = Enum.ScaleType.Slice
+                    toggleInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+                    local toggleBox = Instance.new('Frame')
+
+                    toggleBox.Parent = toggleButton2
+                    toggleBox.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+                    toggleBox.BorderSizePixel = 0
+                    toggleBox.Position = UDim2.new(0, 6, 0.5, -6)
+                    toggleBox.Size = UDim2.new(0, 12, 0, 12)
+
+                    local toggleIndicator = Instance.new('Frame')
+
+                    toggleIndicator.Parent = toggleBox
+                    toggleIndicator.BackgroundColor3 = nexlib.accentclr
+                    toggleIndicator.BorderSizePixel = 0
+                    toggleIndicator.Position = UDim2.new(0, 2, 0, 2)
+                    toggleIndicator.Size = UDim2.new(0, 8, 0, 8)
+                    toggleIndicator.Visible = default or false
+
+                    local toggleLabel = Instance.new('TextLabel')
+
+                    toggleLabel.Parent = toggleButton2
+                    toggleLabel.BackgroundTransparency = 1
+                    toggleLabel.Position = UDim2.new(0, 25, 0, 0)
+                    toggleLabel.Size = UDim2.new(1, -25, 1, 0)
+                    toggleLabel.Font = Enum.Font.Code
+                    toggleLabel.Text = text
+                    toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+                    toggleLabel.TextSize = 14
+                    toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+                    local toggleState = default or false
+
+                    toggleButton2.MouseButton1Click:Connect(function()
+                        toggleState = not toggleState
+                        toggleIndicator.Visible = toggleState
+
+                        pcall(callback, toggleState)
+                    end)
+                    refreshMultiTabs()
+                    coroutine.wrap(function()
+                        while task.wait() do
+                            toggleIndicator.BackgroundColor3 = nexlib.accentclr
+                        end
+                    end)()
+
+                    local toggleApi = {}
+
+                    function toggleApi:Set(value)
+                        toggleState = value
+                        toggleIndicator.Visible = toggleState
+
+                        pcall(callback, toggleState)
+                    end
+
+                    return toggleApi
+                end
+                function pageApi:Slider(text, min, max, default, rounding, callback)
+                    local sliderButton = Instance.new('TextButton')
+
+                    sliderButton.Name = 'SliderBar'
+                    sliderButton.Parent = multiSectionContent
+                    sliderButton.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+                    sliderButton.BorderSizePixel = 0
+                    sliderButton.Size = UDim2.new(1, 0, 0, 16)
+                    sliderButton.Text = ''
+                    sliderButton.AutoButtonColor = false
+
+                    local sliderShadow = Instance.new('ImageLabel')
+
+                    sliderShadow.Parent = sliderButton
+                    sliderShadow.BackgroundTransparency = 1
+                    sliderShadow.Size = UDim2.new(1, 0, 1, 0)
+                    sliderShadow.Image = 'rbxassetid://2592362371'
+                    sliderShadow.ImageColor3 = Color3.fromRGB(60, 60, 60)
+                    sliderShadow.ScaleType = Enum.ScaleType.Slice
+                    sliderShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+                    local sliderInnerShadow = Instance.new('ImageLabel')
+
+                    sliderInnerShadow.Parent = sliderButton
+                    sliderInnerShadow.BackgroundTransparency = 1
+                    sliderInnerShadow.Position = UDim2.new(0, 1, 0, 1)
+                    sliderInnerShadow.Size = UDim2.new(1, -2, 1, -2)
+                    sliderInnerShadow.Image = 'rbxassetid://2592362371'
+                    sliderInnerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+                    sliderInnerShadow.ScaleType = Enum.ScaleType.Slice
+                    sliderInnerShadow.SliceCenter = Rect.new(2, 2, 62, 62)
+
+                    local sliderFill = Instance.new('Frame')
+
+                    sliderFill.Parent = sliderButton
+                    sliderFill.BackgroundColor3 = nexlib.accentclr
+                    sliderFill.BorderSizePixel = 0
+                    sliderFill.BackgroundTransparency = 0.55
+                    sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+
+                    local sliderLabel = Instance.new('TextLabel')
+
+                    sliderLabel.Parent = sliderButton
+                    sliderLabel.BackgroundTransparency = 1
+                    sliderLabel.Position = UDim2.new(0, 6, 0, 0)
+                    sliderLabel.Size = UDim2.new(0.7, 0, 1, 0)
+                    sliderLabel.Font = Enum.Font.Code
+                    sliderLabel.Text = text
+                    sliderLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+                    sliderLabel.TextSize = 13
+                    sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    sliderLabel.ZIndex = 2
+
+                    local sliderValueLabel = Instance.new('TextLabel')
+
+                    sliderValueLabel.Parent = sliderButton
+                    sliderValueLabel.BackgroundTransparency = 1
+                    sliderValueLabel.Position = UDim2.new(1, -75, 0, 0)
+                    sliderValueLabel.Size = UDim2.new(0, 70, 1, 0)
+                    sliderValueLabel.Font = Enum.Font.Code
+                    sliderValueLabel.Text = tostring(default) .. 's'
+                    sliderValueLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+                    sliderValueLabel.TextSize = 13
+                    sliderValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+                    sliderValueLabel.ZIndex = 5
+
+                    local isDragging = false
+
+                    local function updateSliderFromInput(input)
+                        local sliderPercent = math.clamp((input.Position.X - sliderButton.AbsolutePosition.X) / sliderButton.AbsoluteSize.X, 0, 1)
+                        local value = min + (max - min) * sliderPercent
+
+                        if rounding == 0 then
+                            value = math.floor(value + 0.5)
+                        else
+                            value = tonumber(string.format('%.' .. rounding .. 'f', value))
+                        end
+
+                        sliderFill.Size = UDim2.new(sliderPercent, 0, 1, 0)
+                        sliderValueLabel.Text = tostring(value) .. 's'
+
+                        pcall(callback, value)
+                    end
+
+                    sliderButton.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                            isDragging = true
+
+                            updateSliderFromInput(input)
+                        end
+                    end)
+                    game:GetService('UserInputService').InputEnded:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                            isDragging = false
+                        end
+                    end)
+                    game:GetService('UserInputService').InputChanged:Connect(function(input)
+                        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                            updateSliderFromInput(input)
+                        end
+                    end)
+                    refreshMultiTabs()
+                    coroutine.wrap(function()
+                        while task.wait() do
+                            sliderFill.BackgroundColor3 = nexlib.accentclr
+                        end
+                    end)()
+                end
+                function pageApi:Label(text)
+                    local labelApi = {}
+                    local label = Instance.new('TextLabel')
+
+                    label.Parent = multiSectionContent
+                    label.BackgroundTransparency = 1
+                    label.Size = UDim2.new(1, 0, 0, 18)
+                    label.Font = Enum.Font.Code
+                    label.Text = text
+                    label.TextColor3 = Color3.fromRGB(230, 230, 230)
+                    label.TextSize = 14
+                    label.TextXAlignment = Enum.TextXAlignment.Left
+
+                    refreshMultiTabs()
+
+                    function labelApi:Change(newText)
+                        label.Text = newText
+                    end
+
+                    return labelApi
+                end
+
+                multiSectionTabs[tabName] = pageApi
+            end
+
+            task.defer(refreshMultiSection)
+
+            return multiSectionTabs
+        end
+
+        return tabApi
+    end
+    function windowApi:Destroy()
+        if lighting:FindFirstChild('ValkUIBlur') then
+            lighting.ValkUIBlur:Destroy()
+        end
+
+        mainScreenGui:Destroy()
+    end
+
+    local function showIntro()
+        local tweenService = game:GetService('TweenService')
+        local lighting = game:GetService('Lighting')
+
+        task.wait(0.7)
+
+        local introStartTime = tick()
+
+        while tick() - introStartTime < 3 do
+            task.wait()
+        end
+
+        local previousFrameTime = tick()
+
+        while tick() - previousFrameTime < 2 do
+            local busyLoopAccumulator = 0
+
+            for i = 1, 500000 do
+                busyLoopAccumulator = busyLoopAccumulator + i
+            end
+
+            task.wait()
+        end
+
+        local introBlur = lighting:FindFirstChild('ValkUIBlur') or Instance.new('BlurEffect')
+
+        introBlur.Name = 'ValkUIBlur'
+        introBlur.Size = 0
+        introBlur.Parent = lighting
+
+        local introTitleLabel = Instance.new('TextLabel')
+
+        introTitleLabel.Name = 'IntroLEVK'
+        introTitleLabel.Parent = mainScreenGui
+        introTitleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        introTitleLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+        introTitleLabel.Size = UDim2.new(0, 400, 0, 100)
+        introTitleLabel.BackgroundTransparency = 1
+        introTitleLabel.Font = Enum.Font.Code
+        introTitleLabel.Text = 'LEVK'
+        introTitleLabel.TextColor3 = nexlib.accentclr
+        introTitleLabel.TextSize = 80
+        introTitleLabel.TextTransparency = 1
+
+        local introFadeIn = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local introFadeOut = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+        tweenService:Create(introBlur, introFadeIn, {Size = 24}):Play()
+        tweenService:Create(introTitleLabel, introFadeIn, {TextTransparency = 0}):Play()
+        task.wait(2.2)
+
+        local blurRestoreTween = tweenService:Create(introBlur, introFadeOut, {Size = 18})
+        local introTextFadeOut = tweenService:Create(introTitleLabel, introFadeOut, {TextTransparency = 1})
+
+        blurRestoreTween:Play()
+        introTextFadeOut:Play()
+        blurRestoreTween.Completed:Connect(function()
+            introTitleLabel:Destroy()
+
+            windowVisible = true
+
+            updateWindowVisibility()
+        end)
+    end
+
+    task.spawn(showIntro)
+
+    return windowApi
+end
+
+local Players = game:GetService('Players')
+local RunService = game:GetService('RunService')
+local UserInputService = game:GetService('UserInputService')
+local Workspace = game:GetService('Workspace')
+local HttpService = game:GetService('HttpService')
+local TweenService = game:GetService('TweenService')
+local ReplicatedStorage = game:GetService('ReplicatedStorage')
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+local teamCheckEnabled = true
+
+local function isTeammate(player)
+    if not teamCheckEnabled then
+        return false
+    end
+
+    local localTeamId = LocalPlayer:GetAttribute('TeamID')
+    local targetTeamId = player:GetAttribute('TeamID')
+
+    if localTeamId == nil or targetTeamId == nil then
+        return false
+    end
+
+    return targetTeamId == localTeamId
+end
+local function isInvulnerable(playerOrChar)
+    local char = playerOrChar
+
+    if typeof(playerOrChar) == 'Instance' and playerOrChar:IsA('Player') then
+        char = playerOrChar.Character
+    end
+    if not char then
+        return true
+    end
+    if char:FindFirstChildOfClass('ForceField') then
+        return true
+    end
+
+    local rootPart = char:FindFirstChild('HumanoidRootPart')
+
+    if rootPart and rootPart:FindFirstChild('Attachment') then
+        return true
+    end
+
+    local immuneAttribute = char:GetAttribute('Immune') or char:GetAttribute('Invincible') or char:GetAttribute('IsImmune')
+
+    if immuneAttribute == true then
+        return true
+    end
+
+    local humanoid = char:FindFirstChildOfClass('Humanoid')
+
+    if humanoid then
+        local humanoidImmune = humanoid:GetAttribute('Immune') or humanoid:GetAttribute('Invincible')
+
+        if humanoidImmune == true then
+            return true
+        end
+    end
+
+    return false
+end
+local function isReflectingOrParrying(player)
+    local char = player and player.Character
+
+    if not char then
+        return false
+    end
+
+    local defenseAttributeNames = {
+        'Reflecting',
+        'IsReflecting',
+        'BulletReflect',
+        'Reflect',
+        'Deflecting',
+        'Parrying',
+    }
+
+    for _, a in ipairs(defenseAttributeNames)do
+        local value = char:GetAttribute(a)
+
+        if value == true or value == 1 or value == 'true' then
+            return true
+        end
+
+        local humanoid = char:FindFirstChildOfClass('Humanoid')
+
+        if humanoid then
+            local humanoidDefenseAttribute = humanoid:GetAttribute(a)
+
+            if humanoidDefenseAttribute == true or humanoidDefenseAttribute == 1 then
+                return true
+            end
+        end
+    end
+
+    local hasKatana = false
+    local equippedTool = char:FindFirstChildOfClass('Tool')
+
+    if equippedTool and string.find(string.lower(equippedTool.Name), 'katana', 1, true) then
+        hasKatana = true
+    end
+
+    for _, ch in ipairs(char:GetChildren())do
+        local childNameLower = string.lower(ch.Name)
+
+        if string.find(childNameLower, 'katana', 1, true) then
+            hasKatana = true
+        end
+        if string.find(childNameLower, 'reflect', 1, true) or string.find(childNameLower, 'deflect', 1, true) then
+            return true
+        end
+    end
+
+    local humanoid = char:FindFirstChildOfClass('Humanoid')
+
+    if humanoid then
+        local success, animationTracks = pcall(function()
+            return humanoid:GetPlayingAnimationTracks()
+        end)
+
+        if success and animationTracks then
+            for _, track in ipairs(animationTracks)do
+                local trackName = string.lower(tostring(track.Name or ''))
+                local animationId = ''
+
+                pcall(function()
+                    if track.Animation then
+                        animationId = tostring(track.Animation.AnimationId or '')
+                    end
+                end)
+
+                local animationInfo = trackName .. ' ' .. string.lower(animationId)
+
+                if string.find(animationInfo, 'reflect', 1, true) or string.find(animationInfo, 'deflect', 1, true) or string.find(animationInfo, 'parry', 1, true) or string.find(animationInfo, 'block', 1, true) then
+                    if hasKatana or string.find(animationInfo, 'katana', 1, true) then
+                        return true
+                    end
+                    if string.find(animationInfo, 'reflect', 1, true) or string.find(animationInfo, 'deflect', 1, true) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+local attackPhaseActive = true
+local pullEnemiesEnabled = false
+local orbitDesyncEnabled = false
+local desyncDistance = 50000000
+local voidHeightLockEnabled = false
+local voidHeight = 50
+local baitingEnabled = false
+local voidCycleEnabled = false
+local hideDuration = 0.25
+local attackDuration = 0.1
+local ragebotEnabled = false
+
+task.spawn(function()
+    while true do
+        if voidCycleEnabled and ragebotEnabled then
+            attackPhaseActive = true
+
+            local activeDuration = attackDuration
+
+            if typeof(activeDuration) ~= 'number' or activeDuration < 0.01 then
+                activeDuration = 0.01
+            end
+
+            task.wait(activeDuration)
+
+            if voidCycleEnabled and ragebotEnabled then
+                attackPhaseActive = false
+
+                local inactiveDuration = hideDuration
+
+                if typeof(inactiveDuration) ~= 'number' or inactiveDuration < 0.01 then
+                    inactiveDuration = 0.01
+                end
+
+                task.wait(inactiveDuration)
+            else
+                attackPhaseActive = true
+            end
+        else
+            attackPhaseActive = true
+
+            task.wait(0.05)
+        end
+    end
+end)
+
+local aimbotEnabled = false
+local aimbotSmoothness = 5
+local aimbotFovRadius = 100
+local aimbotHitPart = 'head'
+local showAimbotFov = false
+local aimbotWallCheck = false
+local aimbotRequireRMB = false
+local silentAimEnabled = false
+local silentAimHitPart = 'head'
+local silentAimFovRadius = 300
+local showSilentAimFov = false
+local silentWallCheck = false
+local silentAimTarget = nil
+local triggerbotEnabled = false
+local noSpreadEnabled = false
+local noMuzzleFlashEnabled = false
+local noShootCooldownEnabled = false
+local shootCooldownOverridden = false
+local instantProjectileReloadEnabled = false
+local noRecoilEnabled = false
+local recoilOverridden = false
+local shaderEnabled = false
+local showRagebotIndicator = false
+local showAmmoIndicator = false
+local espEnabled = false
+local espBoxEnabled = true
+local espNameEnabled = true
+local espHealthEnabled = true
+local espWeaponEnabled = true
+local collectHealthDrops = true
+local collectAmmoDrops = true
+local autoCollectDropsEnabled = false
+local mobileFlyEnabled = false
+local keyboardFlyEnabled = false
+local mobileFlySpeed = 50
+local keyboardFlySpeed = 50
+local noclipEnabled = false
+local noclipMode = 'all walls'
+local thirdPersonEnabled = false
+local emoteHopEnabled = false
+local emoteSpeed = 40
+local currentEmoteTrack = nil
+local emoteAnimation = nil
+local customSkyEnabled = false
+local selectedSkybox = ''
+local deviceSpoofEnabled = false
+local spoofedDevice = 'vr'
+local skyboxPresets = {
+    ['Dark Sky'] = {
+        SkyboxUp = 'rbxassetid://570555929',
+        SkyboxRt = 'rbxassetid://570555882',
+        SkyboxDn = 'rbxassetid://570555964',
+        SkyboxFt = 'rbxassetid://570555800',
+        SkyboxLf = 'rbxassetid://570555840',
+        SkyboxBk = 'rbxassetid://570555736',
+    },
+    Vaporwave = {
+        SkyboxUp = 'rbxassetid://1417494643',
+        SkyboxRt = 'rbxassetid://1417494499',
+        SkyboxLf = 'rbxassetid://1417494402',
+        SkyboxFt = 'rbxassetid://1417494253',
+        SkyboxBk = 'rbxassetid://1417494030',
+        SkyboxDn = 'rbxassetid://1417494146',
+    },
+    ['Lake Sky'] = {
+        SkyboxRt = 'rbxassetid://6823531746',
+        SkyboxUp = 'rbxassetid://6823528533',
+        SunTextureId = 'rbxassetid://5392574622',
+        SkyboxDn = 'rbxassetid://6823525702',
+        SkyboxFt = 'rbxassetid://6823482923',
+        SkyboxLf = 'rbxassetid://6823530023',
+        SkyboxBk = 'rbxassetid://6823523318',
+    },
+    ['Black Mesa'] = {
+        SkyboxUp = 'rbxassetid://9569598752',
+        SkyboxRt = 'rbxassetid://9569601267',
+        SkyboxDn = 'rbxassetid://9569613307',
+        SkyboxFt = 'rbxassetid://9569611418',
+        SkyboxLf = 'rbxassetid://9569608166',
+        SkyboxBk = 'rbxassetid://9569742122',
+    },
+}
+
+local function applySkybox(skyboxName)
+    local lighting = game:GetService('Lighting')
+    local customSkybox = lighting:FindFirstChild('CustomSkybox')
+
+    if not customSkyEnabled or not skyboxName or skyboxName == '' then
+        if customSkybox then
+            customSkybox:Destroy()
+        end
+
+        return
+    end
+
+    local skyboxProperties = skyboxPresets[skyboxName]
+
+    if skyboxProperties then
+        if not customSkybox then
+            customSkybox = Instance.new('Sky')
+            customSkybox.Name = 'CustomSkybox'
+            customSkybox.Parent = lighting
+        end
+
+        customSkybox.SkyboxUp = ''
+        customSkybox.SkyboxRt = ''
+        customSkybox.SkyboxDn = ''
+        customSkybox.SkyboxFt = ''
+        customSkybox.SkyboxLf = ''
+        customSkybox.SkyboxBk = ''
+        customSkybox.SunTextureId = ''
+
+        for prop, propertyValue in pairs(skyboxProperties)do
+            customSkybox[prop] = propertyValue
+        end
+    end
+end
+
+local fullbrightEnabled = false
+local unusedTextState1 = ''
+local unusedTextState2 = ''
+local unusedBooleanState = false
+local unusedPositionState = Vector3.zero
+local unusedOffsetState = Vector3.new(0, 2, 0)
+local desyncOrigin = nil
+local ragebotTargetPart = nil
+
+local function findHeadHitbox(char)
+    if not char then
+        return nil
+    end
+
+    return char:FindFirstChild('HitboxHead') or char:FindFirstChild('HitboxHeadSmall') or char:FindFirstChild('Head')
+end
+
+local ragebotFireConnection
+local setRagebotFireEnabled = function(on) end
+local targetHeightOffset = 3
+
+task.spawn(function()
+    local success, failure = xpcall(function()
+        local playerScripts = LocalPlayer.PlayerScripts
+        local fighterControllerLoaded, fighterController = pcall(require, playerScripts.Controllers.FighterController)
+        local enumLibraryLoadOk, enumLibrary = pcall(require, ReplicatedStorage.Modules.EnumLibrary)
+        local useItemRemote = ReplicatedStorage.Remotes.Replication.Fighter.UseItem
+        local startShootingEnum
+
+        pcall(function()
+            startShootingEnum = enumLibrary:ToEnum('StartShooting')
+        end)
+
+        local function getEquippedObjectId()
+            if not (fighterControllerLoaded and fighterController) then
+                return nil
+            end
+
+            local localFighter = fighterController.LocalFighter
+
+            if not localFighter then
+                return nil
+            end
+
+            local equippedItem = localFighter.EquippedItem
+
+            if not equippedItem then
+                return nil
+            end
+
+            local readSucceeded, objectId = pcall(function()
+                return equippedItem:Get('ObjectID')
+            end)
+
+            if readSucceeded and objectId then
+                return objectId
+            end
+
+            readSucceeded, objectId = pcall(function()
+                return equippedItem.Data and equippedItem.Data.ObjectID
+            end)
+
+            return readSucceeded and objectId or nil
+        end
+        local function buildUseItemPayload(originPos, hitPart)
+            local targetPosition = hitPart.Position
+            local firingCFrame = CFrame.lookAt(originPos, targetPosition)
+            local pitch, yaw, roll = firingCFrame:ToOrientation()
+            local serializedOrigin = {
+                [utf8.char(0)] = originPos.X,
+                [utf8.char(1)] = originPos.Y,
+                [utf8.char(2)] = originPos.Z,
+                [utf8.char(3)] = pitch,
+                [utf8.char(4)] = yaw,
+                [utf8.char(5)] = roll,
+            }
+            local relativeHitCFrame = hitPart.CFrame:ToObjectSpace(CFrame.new(targetPosition))
+            local relativePitch, relativeYaw, relativeRoll = relativeHitCFrame:ToOrientation()
+
+            return {
+                [utf8.char(1)] = {
+                    [utf8.char(0)] = serializedOrigin,
+                    [utf8.char(1)] = serializedOrigin,
+                    [utf8.char(2)] = hitPart,
+                    [utf8.char(3)] = {
+                        [utf8.char(0)] = relativeHitCFrame.X,
+                        [utf8.char(1)] = relativeHitCFrame.Y,
+                        [utf8.char(2)] = relativeHitCFrame.Z,
+                        [utf8.char(3)] = relativePitch,
+                        [utf8.char(4)] = relativeYaw,
+                        [utf8.char(5)] = relativeRoll,
+                    },
+                },
+            }
+        end
+
+        setRagebotFireEnabled = function(on)
+            if ragebotFireConnection then
+                ragebotFireConnection:Disconnect()
+
+                ragebotFireConnection = nil
+            end
+            if not on then
+                return
+            end
+
+            local lastObjectId = nil
+
+            ragebotFireConnection = RunService.Heartbeat:Connect(function()
+                if not ragebotEnabled or not attackPhaseActive then
+                    return
+                end
+                if not ragebotTargetPart or not ragebotTargetPart.Parent then
+                    return
+                end
+
+                local targetCharacter = ragebotTargetPart:FindFirstAncestorOfClass('Model') or ragebotTargetPart.Parent
+                local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
+
+                if not targetPlayer or targetPlayer == LocalPlayer then
+                    return
+                end
+                if isTeammate(targetPlayer) then
+                    return
+                end
+                if isInvulnerable(targetPlayer) then
+                    return
+                end
+                if isReflectingOrParrying(targetPlayer) then
+                    return
+                end
+
+                local characterRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+
+                if not characterRootPart then
+                    return
+                end
+
+                local useItemObjectId = getEquippedObjectId()
+
+                if useItemObjectId then
+                    lastObjectId = useItemObjectId
+                else
+                    useItemObjectId = lastObjectId
+                end
+                if not useItemObjectId then
+                    return
+                end
+
+                local head = ragebotTargetPart
+                local offsetTargetPosition = head.Position + Vector3.new(0, 0.1, 0)
+                local shotPayload = buildUseItemPayload(offsetTargetPosition, head)
+
+                pcall(function()
+                    useItemRemote:FireServer(useItemObjectId, startShootingEnum, shotPayload, nil)
+                end)
+            end)
+        end
+    end, function(failure) end)
+end)
+
+local savedCFrame = nil
+local savedVelocity = nil
+
+local function canFireEquippedWeapon()
+    local canFire = true
+
+    pcall(function()
+        local playerScripts = LocalPlayer.PlayerScripts
+        local success, fighterController = pcall(require, playerScripts.Controllers.FighterController)
+
+        if not success or not fighterController or not fighterController.LocalFighter then
+            return
+        end
+
+        local equippedItem = fighterController.LocalFighter.EquippedItem
+
+        if not equippedItem then
+            canFire = false
+
+            return
+        end
+
+        local function getItemProperty(key)
+            local readSucceeded, value = pcall(function()
+                if equippedItem.Get then
+                    return equippedItem:Get(key)
+                end
+
+                return equippedItem[key] or (equippedItem.Data and equippedItem.Data[key]) or (equippedItem.Info and equippedItem.Info[key])
+            end)
+
+            if readSucceeded then
+                return value
+            end
+
+            return nil
+        end
+
+        local currentAmmo = getItemProperty('CurrentAmmo') or getItemProperty('Ammo') or getItemProperty('Bullets') or getItemProperty('MagazineAmmo')
+        local isReloading = getItemProperty('Reloading') or getItemProperty('IsReloading')
+
+        if equippedItem.Info and type(equippedItem.Info) == 'table' then
+            if currentAmmo == nil then
+                currentAmmo = equippedItem.Info.CurrentAmmo or equippedItem.Info.Ammo
+            end
+            if equippedItem.Info.Reloading == true or equippedItem.Info.IsReloading == true then
+                isReloading = true
+            end
+        end
+        if isReloading == true then
+            canFire = false
+
+            return
+        end
+        if typeof(currentAmmo) == 'number' and currentAmmo <= 0 then
+            canFire = false
+
+            return
+        end
+    end)
+
+    return canFire
+end
+local function restorePlayerPosition()
+    local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+
+    if not rootPart or not savedCFrame then
+        return
+    end
+
+    rootPart.CFrame = savedCFrame
+
+    if savedVelocity then
+        rootPart.AssemblyLinearVelocity = savedVelocity
+    end
+
+    savedCFrame = nil
+    savedVelocity = nil
+end
+
+pcall(function()
+    RunService:UnbindFromRenderStep('RestoreDesyncPerfect')
+end)
+pcall(function()
+    RunService:BindToRenderStep('RestoreDesyncPerfect', 0, restorePlayerPosition)
+end)
+RunService.RenderStepped:Connect(restorePlayerPosition)
+RunService.Heartbeat:Connect(function()
+    pcall(function()
+        local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+
+        if not rootPart then
+            return
+        end
+        if savedCFrame then
+            restorePlayerPosition()
+        end
+        if ragebotEnabled and attackPhaseActive and ragebotTargetPart and canFireEquippedWeapon() then
+            local targetModel = ragebotTargetPart:FindFirstAncestorOfClass('Model') or ragebotTargetPart.Parent
+            local targetPlayer = Players:GetPlayerFromCharacter(targetModel)
+
+            if targetPlayer and isReflectingOrParrying(targetPlayer) then
+                return
+            end
+
+            savedCFrame = rootPart.CFrame
+            savedVelocity = rootPart.AssemblyLinearVelocity
+
+            local targetPosition = ragebotTargetPart.Position
+            local teleportPosition = targetPosition + Vector3.new(0, targetHeightOffset, 0)
+
+            rootPart.CFrame = CFrame.new(teleportPosition, targetPosition)
+
+            return
+        end
+        if orbitDesyncEnabled then
+            if not desyncOrigin then
+                desyncOrigin = rootPart.Position
+            end
+
+            savedCFrame = rootPart.CFrame
+            savedVelocity = rootPart.AssemblyLinearVelocity
+
+            local randomDirection = Vector3.new(math.random(-100, 100), math.random(-100, 100), math.random(-100, 100)).Unit
+            local teleportPosition = desyncOrigin + randomDirection * desyncDistance
+            local rotationOnlyCFrame = savedCFrame - savedCFrame.Position
+
+            rootPart.CFrame = CFrame.new(teleportPosition) * rotationOnlyCFrame
+        end
+    end)
+end)
+task.spawn(function()
+    while true do
+        task.wait(0.01)
+
+        if ragebotEnabled and attackPhaseActive then
+            local localRootPosition = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and LocalPlayer.Character.HumanoidRootPart.Position or Vector3.zero
+            local nearestPlayer = nil
+            local nearestDistance = math.huge
+
+            for _, player in pairs(Players:GetPlayers())do
+                if player ~= LocalPlayer and player.Character and not isTeammate(player) then
+                    if isInvulnerable(player) then
+                        continue
+                    end
+                    if isReflectingOrParrying(player) then
+                        continue
+                    end
+
+                    local rootPart = player.Character:FindFirstChild('HumanoidRootPart')
+                    local humanoid = player.Character:FindFirstChild('Humanoid')
+
+                    if rootPart and humanoid and humanoid.Health > 0 then
+                        local horizontalDistance = (Vector3.new(localRootPosition.X, 0, localRootPosition.Z) - Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z)).Magnitude
+
+                        if horizontalDistance < nearestDistance then
+                            nearestDistance = horizontalDistance
+                            nearestPlayer = player
+                        end
+                    end
+                end
+            end
+
+            if nearestPlayer and nearestPlayer.Character then
+                ragebotTargetPart = findHeadHitbox(nearestPlayer.Character)
+            else
+                ragebotTargetPart = nil
+            end
+        else
+            ragebotTargetPart = nil
+        end
+    end
+end)
+
+local autoUseConnection = nil
+
+local function setBaitingFireEnabled(on)
+    if autoUseConnection then
+        autoUseConnection:Disconnect()
+
+        autoUseConnection = nil
+    end
+    if not on then
+        return
+    end
+
+    task.spawn(function()
+        local success, failure = xpcall(function()
+            local playerScripts = LocalPlayer.PlayerScripts
+            local fighterControllerLoaded, fighterController = pcall(require, playerScripts.Controllers.FighterController)
+            local enumLibraryLoadOk, enumLibrary = pcall(require, ReplicatedStorage.Modules.EnumLibrary)
+            local useItemRemote = ReplicatedStorage.Remotes.Replication.Fighter.UseItem
+            local startShootingEnum
+
+            pcall(function()
+                startShootingEnum = enumLibrary:ToEnum('StartShooting')
+            end)
+
+            local function getEquippedObjectId()
+                if not (fighterControllerLoaded and fighterController) then
+                    return nil
+                end
+
+                local localFighter = fighterController.LocalFighter
+
+                if not localFighter then
+                    return nil
+                end
+
+                local equippedItem = localFighter.EquippedItem
+
+                if not equippedItem then
+                    return nil
+                end
+
+                local readSucceeded, objectId = pcall(function()
+                    return equippedItem:Get('ObjectID')
+                end)
+
+                if readSucceeded and objectId then
+                    return objectId
+                end
+
+                readSucceeded, objectId = pcall(function()
+                    return equippedItem.Data and equippedItem.Data.ObjectID
+                end)
+
+                return readSucceeded and objectId or nil
+            end
+            local function buildUseItemPayload(originPos, hitPart)
+                local targetPosition = hitPart.Position
+                local firingCFrame = CFrame.lookAt(originPos, targetPosition)
+                local pitch, yaw, roll = firingCFrame:ToOrientation()
+                local serializedOrigin = {
+                    [utf8.char(0)] = originPos.X,
+                    [utf8.char(1)] = originPos.Y,
+                    [utf8.char(2)] = originPos.Z,
+                    [utf8.char(3)] = pitch,
+                    [utf8.char(4)] = yaw,
+                    [utf8.char(5)] = roll,
+                }
+                local relativeHitCFrame = hitPart.CFrame:ToObjectSpace(CFrame.new(targetPosition))
+                local relativePitch, relativeYaw, relativeRoll = relativeHitCFrame:ToOrientation()
+
+                return {
+                    [utf8.char(1)] = {
+                        [utf8.char(0)] = serializedOrigin,
+                        [utf8.char(1)] = serializedOrigin,
+                        [utf8.char(2)] = hitPart,
+                        [utf8.char(3)] = {
+                            [utf8.char(0)] = relativeHitCFrame.X,
+                            [utf8.char(1)] = relativeHitCFrame.Y,
+                            [utf8.char(2)] = relativeHitCFrame.Z,
+                            [utf8.char(3)] = relativePitch,
+                            [utf8.char(4)] = relativeYaw,
+                            [utf8.char(5)] = relativeRoll,
+                        },
+                    },
+                }
+            end
+
+            local lastObjectId = nil
+
+            autoUseConnection = RunService.Heartbeat:Connect(function()
+                if not baitingEnabled or not attackPhaseActive then
+                    return
+                end
+
+                local characterRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+
+                if not characterRootPart then
+                    return
+                end
+
+                local useItemObjectId = getEquippedObjectId()
+
+                if useItemObjectId then
+                    lastObjectId = useItemObjectId
+                else
+                    useItemObjectId = lastObjectId
+                end
+                if not useItemObjectId then
+                    return
+                end
+
+                for _, plr in ipairs(Players:GetPlayers())do
+                    if plr == LocalPlayer then
+                        continue
+                    end
+                    if isTeammate(plr) then
+                        continue
+                    end
+                    if isInvulnerable(plr) then
+                        continue
+                    end
+
+                    local char = plr.Character
+
+                    if not char then
+                        continue
+                    end
+
+                    local humanoid = char:FindFirstChildWhichIsA('Humanoid')
+
+                    if not humanoid or humanoid.Health <= 0 then
+                        continue
+                    end
+
+                    local head = char:FindFirstChild('Head')
+
+                    if not head then
+                        continue
+                    end
+
+                    local spawnAimPosition = head.Position - Vector3.new(0, 5, 0)
+                    local shotPayload = buildUseItemPayload(spawnAimPosition, head)
+
+                    pcall(function()
+                        useItemRemote:FireServer(useItemObjectId, startShootingEnum, shotPayload, nil)
+                    end)
+                end
+            end)
+        end, function(failure) end)
+    end)
+end
+
+local playerScripts = LocalPlayer.PlayerScripts
+local controllersFolder = playerScripts:WaitForChild('Controllers', 10)
+local EnumLibrary = require(ReplicatedStorage.Modules:WaitForChild('EnumLibrary', 10))
+
+if EnumLibrary then
+    EnumLibrary:WaitForEnumBuilder()
+end
+
+local CosmeticLibrary = require(ReplicatedStorage.Modules:WaitForChild('CosmeticLibrary', 10))
+local ItemLibrary = require(ReplicatedStorage.Modules:WaitForChild('ItemLibrary', 10))
+local PlayerDataController = require(controllersFolder:WaitForChild('PlayerDataController', 10))
+local equippedCosmetics, favoriteCosmetics = {}, {}
+local pendingViewModelWeapon, viewedProfilePlayer = nil, nil
+local lastUsedWeaponName = nil
+
+local function buildCosmeticData(cosmeticName, cosmeticType, cosmeticOptions)
+    local cosmeticDefinition = CosmeticLibrary.Cosmetics[cosmeticName]
+
+    if not cosmeticDefinition then
+        return nil
+    end
+
+    local cosmeticData = {}
+
+    for key, value in pairs(cosmeticDefinition)do
+        cosmeticData[key] = value
+    end
+
+    cosmeticData.Name = cosmeticName
+    cosmeticData.Type = cosmeticData.Type or cosmeticType
+    cosmeticData.Seed = cosmeticData.Seed or math.random(1, 1000000)
+
+    if EnumLibrary then
+        local success, cosmeticEnum = pcall(EnumLibrary.ToEnum, EnumLibrary, cosmeticName)
+
+        if success and cosmeticEnum then
+            cosmeticData.Enum, cosmeticData.ObjectID = cosmeticEnum, cosmeticData.ObjectID or cosmeticEnum
+        end
+    end
+    if cosmeticOptions then
+        if cosmeticOptions.inverted ~= nil then
+            cosmeticData.Inverted = cosmeticOptions.inverted
+        end
+        if cosmeticOptions.favoritesOnly ~= nil then
+            cosmeticData.OnlyUseFavorites = cosmeticOptions.favoritesOnly
+        end
+    end
+
+    return cosmeticData
+end
+
+local configPath = 'unlockall/config.json'
+
+local function saveCosmeticConfig()
+    if not writefile then
+        return
+    end
+
+    pcall(function()
+        local configData = {
+            equipped = {},
+            favorites = favoriteCosmetics,
+        }
+
+        for weaponName, weaponCosmetics in pairs(equippedCosmetics)do
+            configData.equipped[weaponName] = {}
+
+            for cosmeticType, cosmeticData in pairs(weaponCosmetics)do
+                if cosmeticData and cosmeticData.Name then
+                    configData.equipped[weaponName][cosmeticType] = {
+                        name = cosmeticData.Name,
+                        seed = cosmeticData.Seed,
+                        inverted = cosmeticData.Inverted,
+                    }
+                end
+            end
+        end
+
+        makefolder('unlockall')
+        writefile(configPath, HttpService:JSONEncode(configData))
+    end)
+end
+local function loadCosmeticConfig()
+    if not readfile or not isfile or not isfile(configPath) then
+        return
+    end
+
+    pcall(function()
+        local configData = HttpService:JSONDecode(readfile(configPath))
+
+        if configData.equipped then
+            for weaponName, weaponCosmetics in pairs(configData.equipped)do
+                equippedCosmetics[weaponName] = {}
+
+                for cosmeticType, cosmeticData in pairs(weaponCosmetics)do
+                    local cosmeticData2 = buildCosmeticData(cosmeticData.name, cosmeticType, {
+                        inverted = cosmeticData.inverted,
+                    })
+
+                    if cosmeticData2 then
+                        cosmeticData2.Seed = cosmeticData.seed
+                        equippedCosmetics[weaponName][cosmeticType] = cosmeticData2
+                    end
+                end
+            end
+        end
+
+        favoriteCosmetics = configData.favorites or {}
+    end)
+end
+
+local unlockAllEnabled = false
+local originalOwnsCosmetic = CosmeticLibrary.OwnsCosmetic
+
+CosmeticLibrary.OwnsCosmetic = function(self, cosmeticInventory, cosmeticName, weaponName)
+    if not unlockAllEnabled then
+        return originalOwnsCosmetic(self, cosmeticInventory, cosmeticName, weaponName)
+    end
+    if cosmeticName:find('MISSING_') then
+        return originalOwnsCosmetic(self, cosmeticInventory, cosmeticName, weaponName)
+    end
+
+    local cosmeticDefinition = CosmeticLibrary.Cosmetics[cosmeticName]
+
+    if cosmeticDefinition then
+        local cosmeticType = cosmeticDefinition.Type
+
+        if cosmeticType == 'Skin' or cosmeticType == 'Charm' or cosmeticType == 'Dance' or cosmeticType == 'Emote' or cosmeticType == 'Wrap' or cosmeticType == 'Wrapping' or cosmeticName:lower():find('charm') or cosmeticName:lower():find('dance') or cosmeticName:lower():find('emote') or cosmeticName:lower():find('wrap') then
+            return true
+        end
+    end
+
+    return originalOwnsCosmetic(self, cosmeticInventory, cosmeticName, weaponName)
+end
+CosmeticLibrary.OwnsCosmeticNormally = function(self, cosmeticInventory, cosmeticName, weaponName)
+    if not unlockAllEnabled then
+        return false
+    end
+
+    local cosmeticDefinition = CosmeticLibrary.Cosmetics[cosmeticName]
+
+    if cosmeticDefinition and cosmeticDefinition.Type == 'Skin' then
+        return true
+    end
+
+    return false
+end
+CosmeticLibrary.OwnsCosmeticUniversally = function(self, cosmeticInventory, cosmeticName, weaponName)
+    if not unlockAllEnabled then
+        return false
+    end
+
+    local cosmeticDefinition = CosmeticLibrary.Cosmetics[cosmeticName]
+
+    if cosmeticDefinition and cosmeticDefinition.Type == 'Skin' then
+        return true
+    end
+
+    return false
+end
+CosmeticLibrary.OwnsCosmeticForWeapon = function(self, cosmeticInventory, cosmeticName, weaponName)
+    if not unlockAllEnabled then
+        return false
+    end
+
+    local cosmeticDefinition = CosmeticLibrary.Cosmetics[cosmeticName]
+
+    if cosmeticDefinition and cosmeticDefinition.Type == 'Skin' then
+        return true
+    end
+
+    return false
+end
+
+local originalGetPlayerData = PlayerDataController.Get
+
+PlayerDataController.Get = function(self, key)
+    local playerData = originalGetPlayerData(self, key)
+
+    if not unlockAllEnabled then
+        return playerData
+    end
+    if key == 'CosmeticInventory' then
+        local filteredInventory = {}
+
+        if playerData then
+            for k, inventoryEntry in pairs(playerData)do
+                local cosmeticDefinition = CosmeticLibrary.Cosmetics[k]
+
+                if cosmeticDefinition then
+                    filteredInventory[k] = inventoryEntry
+                end
+            end
+        end
+
+        return setmetatable(filteredInventory, {
+            __index = function(t, k)
+                local cosmeticDefinition = CosmeticLibrary.Cosmetics[k]
+
+                if cosmeticDefinition then
+                    return true
+                end
+
+                return nil
+            end,
+        })
+    end
+    if key == 'FavoritedCosmetics' then
+        local mergedFavorites = playerData and table.clone(playerData) or {}
+
+        for weaponName, favs in pairs(favoriteCosmetics)do
+            mergedFavorites[weaponName] = mergedFavorites[weaponName] or {}
+
+            for cosmeticName, isFavorite in pairs(favs)do
+                mergedFavorites[weaponName][cosmeticName] = isFavorite
+            end
+        end
+
+        return mergedFavorites
+    end
+
+    return playerData
+end
+
+local originalGetWeaponData = PlayerDataController.GetWeaponData
+
+PlayerDataController.GetWeaponData = function(self, weaponName)
+    local weaponData = originalGetWeaponData(self, weaponName)
+
+    if not weaponData then
+        return nil
+    end
+
+    local weaponDataCopy = {}
+
+    for key, value in pairs(weaponData)do
+        weaponDataCopy[key] = value
+    end
+
+    weaponDataCopy.Name = weaponName
+
+    if equippedCosmetics[weaponName] then
+        for cosmeticType, cosmeticData in pairs(equippedCosmetics[weaponName])do
+            weaponDataCopy[cosmeticType] = cosmeticData
+        end
+    end
+
+    return weaponDataCopy
+end
+
+local FighterController
+
+pcall(function()
+    FighterController = require(controllersFolder:WaitForChild('FighterController', 10))
+end)
+
+if hookmetamethod then
+    local remotesFolder = ReplicatedStorage:FindFirstChild('Remotes')
+    local dataRemotes = remotesFolder and remotesFolder:FindFirstChild('Data')
+    local equipCosmeticRemote = dataRemotes and dataRemotes:FindFirstChild('EquipCosmetic')
+    local favoriteCosmeticRemote = dataRemotes and dataRemotes:FindFirstChild('FavoriteCosmetic')
+    local replicationRemotes = remotesFolder and remotesFolder:FindFirstChild('Replication')
+    local fighterRemotes = replicationRemotes and replicationRemotes:FindFirstChild('Fighter')
+    local useItemRemote = fighterRemotes and fighterRemotes:FindFirstChild('UseItem')
+    local originalNamecall
+
+    originalNamecall = hookmetamethod(game, '__namecall', function(self, ...)
+        if getnamecallmethod() ~= 'FireServer' then
+            return originalNamecall(self, ...)
+        end
+
+        local arguments = {...}
+
+        if useItemRemote and self == useItemRemote then
+            local itemObjectId = arguments[1]
+
+            if FighterController then
+                pcall(function()
+                    local fighter = FighterController:GetFighter(LocalPlayer)
+
+                    if fighter and fighter.Items then
+                        for _, equippedItem in pairs(fighter.Items)do
+                            if equippedItem:Get('ObjectID') == itemObjectId then
+                                lastUsedWeaponName = equippedItem.Name
+
+                                break
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+        if self == equipCosmeticRemote then
+            local weaponName, cosmeticType, cosmeticName, cosmeticOptions = arguments[1], arguments[2], arguments[3], arguments[4] or {}
+
+            if cosmeticName and cosmeticName ~= 'None' and cosmeticName ~= '' then
+                local cosmeticInventory = originalGetPlayerData(PlayerDataController, 'CosmeticInventory')
+
+                if cosmeticInventory and rawget(cosmeticInventory, cosmeticName) then
+                    return originalNamecall(self, ...)
+                end
+            end
+            if cosmeticType == 'Dance' or cosmeticType == 'Emote' or (cosmeticName and (cosmeticName:lower():find('dance') or cosmeticName:lower():find('emote'))) then
+                equippedCosmetics.Dances = equippedCosmetics.Dances or {}
+
+                if not cosmeticName or cosmeticName == 'None' or cosmeticName == '' then
+                    equippedCosmetics.Dances[cosmeticType] = nil
+                else
+                    local cosmeticData = buildCosmeticData(cosmeticName, cosmeticType, {
+                        inverted = cosmeticOptions.IsInverted,
+                        favoritesOnly = cosmeticOptions.OnlyUseFavorites,
+                    })
+
+                    if cosmeticData then
+                        equippedCosmetics.Dances[cosmeticType] = cosmeticData
+                    end
+                end
+
+                task.defer(function()
+                    pcall(function()
+                        PlayerDataController.CurrentData:Replicate('CosmeticInventory')
+                    end)
+                    task.wait(0.1)
+                    saveCosmeticConfig()
+                end)
+
+                return
+            end
+
+            equippedCosmetics[weaponName] = equippedCosmetics[weaponName] or {}
+
+            if not cosmeticName or cosmeticName == 'None' or cosmeticName == '' then
+                equippedCosmetics[weaponName][cosmeticType] = nil
+
+                if not next(equippedCosmetics[weaponName]) then
+                    equippedCosmetics[weaponName] = nil
+                end
+            else
+                local cosmeticData = buildCosmeticData(cosmeticName, cosmeticType, {
+                    inverted = cosmeticOptions.IsInverted,
+                    favoritesOnly = cosmeticOptions.OnlyUseFavorites,
+                })
+
+                if cosmeticData then
+                    equippedCosmetics[weaponName][cosmeticType] = cosmeticData
+                end
+            end
+
+            task.defer(function()
+                pcall(function()
+                    PlayerDataController.CurrentData:Replicate('WeaponInventory')
+                end)
+                task.wait(0.1)
+                saveCosmeticConfig()
+            end)
+
+            return
+        end
+        if self == favoriteCosmeticRemote then
+            local weaponName, cosmeticName, isFavorite = arguments[1], arguments[2], arguments[3]
+            local cosmeticDefinition = CosmeticLibrary.Cosmetics[cosmeticName]
+
+            if cosmeticDefinition then
+                favoriteCosmetics[weaponName] = favoriteCosmetics[weaponName] or {}
+                favoriteCosmetics[weaponName][cosmeticName] = isFavorite or nil
+
+                saveCosmeticConfig()
+                task.spawn(function()
+                    pcall(function()
+                        PlayerDataController.CurrentData:Replicate('FavoritedCosmetics')
+                    end)
+                end)
+            end
+
+            return
+        end
+
+        return originalNamecall(self, ...)
+    end)
+end
+
+local ClientItem
+
+pcall(function()
+    ClientItem = require(LocalPlayer.PlayerScripts.Modules.ClientReplicatedClasses.ClientFighter.ClientItem)
+end)
+
+if ClientItem and ClientItem._CreateViewModel then
+    local originalCreateViewModel = ClientItem._CreateViewModel
+
+    ClientItem._CreateViewModel = function(self, viewmodelRef)
+        local weaponName = self.Name
+        local ownerPlayer = self.ClientFighter and self.ClientFighter.Player
+
+        pendingViewModelWeapon = (ownerPlayer == LocalPlayer) and weaponName or nil
+
+        if ownerPlayer == LocalPlayer and equippedCosmetics[weaponName] and viewmodelRef then
+            local dataEnum = self:ToEnum('Data')
+            local viewModelData = viewmodelRef[dataEnum] or viewmodelRef.Data
+
+            if viewModelData then
+                if equippedCosmetics[weaponName].Skin then
+                    viewModelData[self:ToEnum('Skin') or 'Skin'] = equippedCosmetics[weaponName].Skin
+                    viewModelData[self:ToEnum('Name') or 'Name'] = equippedCosmetics[weaponName].Skin.Name
+                end
+                if equippedCosmetics[weaponName].Charm then
+                    viewModelData[self:ToEnum('Charm') or 'Charm'] = equippedCosmetics[weaponName].Charm
+                end
+                if equippedCosmetics[weaponName].Wrap then
+                    viewModelData[self:ToEnum('Wrap') or 'Wrap'] = equippedCosmetics[weaponName].Wrap
+                end
+            end
+        end
+
+        local viewModel = originalCreateViewModel(self, viewmodelRef)
+
+        pendingViewModelWeapon = nil
+
+        return viewModel
+    end
+end
+
+local clientViewModelModule = LocalPlayer.PlayerScripts.Modules.ClientReplicatedClasses.ClientFighter.ClientItem:FindFirstChild('ClientViewModel')
+
+if clientViewModelModule then
+    local ClientViewModel = require(clientViewModelModule)
+
+    if ClientViewModel.GetCharm then
+        local originalGetCharm = ClientViewModel.GetCharm
+
+        ClientViewModel.GetCharm = function(self)
+            local weaponName = self.ClientItem and self.ClientItem.Name
+            local ownerPlayer = self.ClientItem and self.ClientItem.ClientFighter and self.ClientItem.ClientFighter.Player
+
+            if weaponName and ownerPlayer == LocalPlayer and equippedCosmetics[weaponName] and equippedCosmetics[weaponName].Charm then
+                return equippedCosmetics[weaponName].Charm
+            end
+
+            return originalGetCharm(self)
+        end
+    end
+    if ClientViewModel.GetWrap then
+        local originalGetWrap = ClientViewModel.GetWrap
+
+        ClientViewModel.GetWrap = function(self)
+            local weaponName = self.ClientItem and self.ClientItem.Name
+            local ownerPlayer = self.ClientItem and self.ClientItem.ClientFighter and self.ClientItem.ClientFighter.Player
+
+            if weaponName and ownerPlayer == LocalPlayer and equippedCosmetics[weaponName] and equippedCosmetics[weaponName].Wrap then
+                return equippedCosmetics[weaponName].Wrap
+            end
+
+            return originalGetWrap(self)
+        end
+    end
+
+    local originalNewViewModel = ClientViewModel.new
+
+    ClientViewModel.new = function(replicatedData, clientItem)
+        local ownerPlayer = clientItem.ClientFighter and clientItem.ClientFighter.Player
+        local weaponName = pendingViewModelWeapon or clientItem.Name
+
+        if ownerPlayer == LocalPlayer and equippedCosmetics[weaponName] then
+            local ReplicatedClass = require(ReplicatedStorage.Modules.ReplicatedClass)
+            local dataEnum = ReplicatedClass:ToEnum('Data')
+
+            replicatedData[dataEnum] = replicatedData[dataEnum] or {}
+
+            local weaponCosmetics = equippedCosmetics[weaponName]
+
+            if weaponCosmetics.Skin then
+                replicatedData[dataEnum][ReplicatedClass:ToEnum('Skin')] = weaponCosmetics.Skin
+            end
+            if weaponCosmetics.Charm then
+                replicatedData[dataEnum][ReplicatedClass:ToEnum('Charm')] = weaponCosmetics.Charm
+            end
+            if weaponCosmetics.Wrap then
+                replicatedData[dataEnum][ReplicatedClass:ToEnum('Wrap')] = weaponCosmetics.Wrap
+            end
+        end
+
+        local viewModel = originalNewViewModel(replicatedData, clientItem)
+
+        if ownerPlayer == LocalPlayer and equippedCosmetics[weaponName] and equippedCosmetics[weaponName].Wrap and viewModel._UpdateWrap then
+            viewModel:_UpdateWrap()
+            task.delay(0.1, function()
+                if not viewModel._destroyed then
+                    viewModel:_UpdateWrap()
+                end
+            end)
+        end
+
+        return viewModel
+    end
+end
+
+ItemLibrary.GetViewModelImageFromWeaponData = function(self, weaponData, highRes)
+    if not weaponData then
+        return nil
+    end
+
+    local weaponName = weaponData.Name
+    local useLocalSkin = (weaponData.Skin and equippedCosmetics[weaponName] and weaponData.Skin == equippedCosmetics[weaponName].Skin) or (viewedProfilePlayer == LocalPlayer and equippedCosmetics[weaponName] and equippedCosmetics[weaponName].Skin)
+
+    if useLocalSkin and equippedCosmetics[weaponName] and equippedCosmetics[weaponName].Skin then
+        local skinViewModel = self.ViewModels[equippedCosmetics[weaponName].Skin.Name]
+
+        if skinViewModel then
+            return skinViewModel[highRes and 'ImageHighResolution' or 'Image'] or skinViewModel.Image
+        end
+    end
+
+    return nil
+end
+
+local EmoteController
+
+pcall(function()
+    EmoteController = require(controllersFolder:WaitForChild('EmoteController', 10))
+
+    if EmoteController and EmoteController.GetEmotes then
+        local originalGetEmotes = EmoteController.GetEmotes
+
+        EmoteController.GetEmotes = function(self)
+            local emotes = originalGetEmotes(self)
+
+            for cosmeticName, cosmeticDefinition in pairs(CosmeticLibrary.Cosmetics)do
+                if cosmeticDefinition and (cosmeticDefinition.Type == 'Dance' or cosmeticDefinition.Type == 'Emote' or cosmeticName:lower():find('dance') or cosmeticName:lower():find('emote')) then
+                    if not emotes[cosmeticName] then
+                        emotes[cosmeticName] = {
+                            Name = cosmeticName,
+                            Type = cosmeticDefinition.Type,
+                            ObjectID = cosmeticDefinition.ObjectID,
+                            Enum = cosmeticDefinition.Enum,
+                        }
+                    end
+                end
+            end
+
+            return emotes
+        end
+    end
+end)
+pcall(function()
+    local ViewProfile = require(LocalPlayer.PlayerScripts.Modules.Pages.ViewProfile)
+
+    if ViewProfile and ViewProfile.Fetch then
+        local originalFetchProfile = ViewProfile.Fetch
+
+        ViewProfile.Fetch = function(self, targetPlayer)
+            viewedProfilePlayer = targetPlayer
+
+            return originalFetchProfile(self, targetPlayer)
+        end
+    end
+end)
+loadCosmeticConfig()
+
+local originalItemAttributes = {
+    ShootCooldown = setmetatable({}, {
+        __mode = 'k',
+    }),
+    ShootRecoil = setmetatable({}, {
+        __mode = 'k',
+    }),
+}
+
+local function overrideItemAttribute(attribute, value)
+    local attributeBackup = originalItemAttributes[attribute]
+
+    if not attributeBackup then
+        return
+    end
+
+    for _, gcVal in pairs(getgc(true))do
+        if type(gcVal) == 'table' then
+            local originalAttributeValue = rawget(gcVal, attribute)
+
+            if originalAttributeValue ~= nil then
+                if attributeBackup[gcVal] == nil then
+                    attributeBackup[gcVal] = originalAttributeValue
+                end
+
+                gcVal[attribute] = value
+            end
+        end
+    end
+end
+local function restoreItemAttribute(attribute)
+    local attributeBackup = originalItemAttributes[attribute]
+
+    if not attributeBackup then
+        return
+    end
+
+    for gcVal, original in pairs(attributeBackup)do
+        if type(gcVal) == 'table' then
+            pcall(function()
+                gcVal[attribute] = original
+            end)
+        end
+
+        attributeBackup[gcVal] = nil
+    end
+end
+
+local originalReloadLengths = {}
+local projectileReloadOverridden = false
+
+local function enableInstantProjectileReload()
+    local ItemLibrary = require(game:GetService('ReplicatedStorage').Modules.ItemLibrary)
+    local Items = rawget(ItemLibrary, 'Items')
+
+    if not Items then
+        return
+    end
+
+    local projectileWeapons = {
+        'Bow',
+        'Daggers',
+        'Slingshot',
+    }
+
+    for _, Item in pairs(Items)do
+        local Name = Item.Name
+
+        if table.find(projectileWeapons, Name) and Item.ReloadLength ~= nil then
+            if originalReloadLengths[Name] == nil then
+                originalReloadLengths[Name] = Item.ReloadLength
+            end
+
+            rawset(Item, 'ReloadLength', (Name == 'Daggers' and 0.09 or 0))
+        end
+    end
+
+    projectileReloadOverridden = true
+end
+local function restoreProjectileReload()
+    local ItemLibrary = require(game:GetService('ReplicatedStorage').Modules.ItemLibrary)
+    local Items = rawget(ItemLibrary, 'Items')
+
+    if not Items then
+        return
+    end
+
+    local projectileWeapons = {
+        'Bow',
+        'Daggers',
+        'Slingshot',
+    }
+
+    for _, Item in pairs(Items)do
+        local Name = Item.Name
+
+        if table.find(projectileWeapons, Name) and originalReloadLengths[Name] ~= nil then
+            rawset(Item, 'ReloadLength', originalReloadLengths[Name])
+        end
+    end
+
+    projectileReloadOverridden = false
+end
+
+local mainWindow = nexlib:Window('\u{d560}\u{bb34}\u{bc1c}\u{d06c} free')
+local menuTabs = {
+    Combat = mainWindow:Tab('Combat'),
+    Visuals = mainWindow:Tab('Visuals'),
+    Misc = mainWindow:Tab('Misc'),
+    ['UI Settings'] = mainWindow:Tab('UI Settings'),
+}
+local silentAimSection = menuTabs.Combat:Section('silent aim', 2)
+local aimbotSection = menuTabs.Combat:Section('aimbot', 1)
+
+silentAimSection:Toggle('enabled', false, function(value)
+    silentAimEnabled = value
+end)
+silentAimSection:Dropdown('hitbox', {
+    'head',
+    'humanoidrootpart',
+    'torso',
+}, 'head', function(value)
+    silentAimHitPart = value
+end)
+silentAimSection:Slider('fov radius', 10, 500, 300, 0, function(value)
+    silentAimFovRadius = value
+end)
+silentAimSection:Toggle('draw fov', false, function(value)
+    showSilentAimFov = value
+end)
+silentAimSection:Toggle('wallcheck', false, function(value)
+    silentWallCheck = value
+end)
+aimbotSection:Toggle('aimbot enabled', false, function(value)
+    aimbotEnabled = value
+end)
+aimbotSection:Dropdown('hitbox', {
+    'head',
+    'humanoidrootpart',
+    'torso',
+}, 'head', function(value)
+    aimbotHitPart = value
+end)
+aimbotSection:Slider('smoothness', 1, 20, 5, 1, function(value)
+    aimbotSmoothness = value
+end)
+aimbotSection:Slider('fov radius', 10, 500, 100, 0, function(value)
+    aimbotFovRadius = value
+end)
+aimbotSection:Toggle('draw fov', false, function(value)
+    showAimbotFov = value
+end)
+aimbotSection:Toggle('wallcheck', false, function(value)
+    aimbotWallCheck = value
+end)
+aimbotSection:Toggle('scope look', false, function(value)
+    aimbotRequireRMB = value
+end)
+
+local mobileUiSection = menuTabs.Combat:Section('mobile setting', 1)
+
+mobileUiSection:Toggle('mobile on', false, function(value)
+    local windowFrame = mainScreenGui:FindFirstChild('MainFrame', true)
+
+    if windowFrame then
+        windowFrame.ClipsDescendants = true
+
+        local contentHolder = windowFrame:FindFirstChild('ContainerHolderFrame')
+
+        if contentHolder then
+            contentHolder.ClipsDescendants = true
+            contentHolder.Size = UDim2.new(1, -18, 1, -42)
+        end
+
+        local tweenService = game:GetService('TweenService')
+        local targetWindowSize = value and UDim2.new(0, 525, 0, 300) or UDim2.new(0, 525, 0, 631)
+
+        tweenService:Create(windowFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetWindowSize}):Play()
+    end
+end)
+
+local pullSection = menuTabs.Combat:Section('pull enabled', 1)
+
+pullSection:Toggle('pull', false, function(value)
+    pullEnemiesEnabled = value
+end)
+
+local ragebotSection = menuTabs.Combat:Section('ragebot', 1)
+
+ragebotSection:Toggle('enabled', false, function(value)
+    ragebotEnabled = value
+
+    pcall(function()
+        setRagebotFireEnabled(value)
+    end)
+end)
+ragebotSection:Toggle('orbit', false, function(value)
+    orbitDesyncEnabled = value
+
+    if value then
+        desyncDistance = 5003
+    end
+end)
+ragebotSection:Toggle('voidspam', false, function(value)
+    voidCycleEnabled = value
+
+    if not value then
+        attackPhaseActive = true
+    end
+end)
+ragebotSection:Slider('hide', 0.01, 1, 0.25, 2, function(value)
+    hideDuration = value
+end)
+ragebotSection:Slider('attack', 0.01, 1, 0.1, 2, function(value)
+    attackDuration = value
+end)
+
+local freeForAllSection = menuTabs.Combat:Section('ffamods', 2)
+
+freeForAllSection:Toggle('team check', true, function(value)
+    teamCheckEnabled = value
+end)
+freeForAllSection:Toggle('baiting', false, function(value)
+    baitingEnabled = value
+    voidHeightLockEnabled = value
+
+    pcall(function()
+        setBaitingFireEnabled(value)
+    end)
+end)
+
+local triggerbotSection = menuTabs.Combat:Section('triggerbot', 2)
+
+triggerbotSection:Toggle('enabled', false, function(value)
+    triggerbotEnabled = value
+end)
+
+local weaponsSection = menuTabs.Combat:Section('weapons', 2)
+
+weaponsSection:Toggle('no spread', false, function(value)
+    noSpreadEnabled = value
+end)
+weaponsSection:Toggle('no muzzle flash', false, function(value)
+    noMuzzleFlashEnabled = value
+end)
+weaponsSection:Toggle('attack cooldown', false, function(value)
+    noShootCooldownEnabled = value
+
+    if not value then
+        pcall(function()
+            restoreItemAttribute('ShootCooldown')
+        end)
+
+        shootCooldownOverridden = false
+    end
+end)
+weaponsSection:Toggle('projectile cooldown', false, function(value)
+    instantProjectileReloadEnabled = value
+
+    if value then
+        pcall(enableInstantProjectileReload)
+    else
+        pcall(restoreProjectileReload)
+    end
+end)
+
+local orbitVoidSection = menuTabs.Combat:Section('orb,void', 2)
+
+orbitVoidSection:Toggle('orbit', false, function(value)
+    orbitDesyncEnabled = value
+end)
+orbitVoidSection:Slider('orbit studs', 5, 10000, 50000000, 0, function(value)
+    desyncDistance = value
+end)
+orbitVoidSection:Toggle('void spam', false, function(value)
+    voidHeightLockEnabled = value
+end)
+orbitVoidSection:Slider('void spam studs', 50, 50000000, 50, 0, function(value)
+    voidHeight = value
+end)
+
+local environmentSection = menuTabs.Visuals:Section('environment', 1)
+
+environmentSection:Toggle('Fullbright', false, function(value)
+    fullbrightEnabled = value
+
+    local lighting = game:GetService('Lighting')
+
+    if value then
+        lighting.Brightness = 2
+        lighting.ClockTime = 14
+        lighting.FogEnd = 100000
+        lighting.GlobalShadows = false
+    else
+        lighting.Brightness = 1
+        lighting.ClockTime = 12
+        lighting.GlobalShadows = true
+    end
+end)
+environmentSection:Toggle('shader', false, function(value)
+    shaderEnabled = value
+end)
+
+local skyboxSection = menuTabs.Visuals:Section('skybox', 2)
+
+skyboxSection:Toggle('skyboxs', false, function(value)
+    customSkyEnabled = value
+
+    applySkybox(selectedSkybox)
+end)
+skyboxSection:Dropdown('Select Skybox', {
+    'Dark Sky',
+    'Vaporwave',
+    'Lake Sky',
+    'Black Mesa',
+}, '', function(value)
+    selectedSkybox = value
+
+    if customSkyEnabled then
+        applySkybox(value)
+    end
+end)
+
+local espSection = menuTabs.Visuals:Section('visual esp', 1)
+
+espSection:Toggle('ESP Active', false, function(value)
+    espEnabled = value
+end)
+espSection:Toggle('Box Display', true, function(value)
+    espBoxEnabled = value
+end)
+espSection:Toggle('Name Display', true, function(value)
+    espNameEnabled = value
+end)
+espSection:Toggle('Health Display', true, function(value)
+    espHealthEnabled = value
+end)
+espSection:Toggle('weapon info', true, function(value)
+    espWeaponEnabled = value
+end)
+
+local indicatorsSection = menuTabs.Visuals:Section('indicators', 1)
+
+indicatorsSection:Toggle('ragebot', false, function(value)
+    showRagebotIndicator = value
+end)
+indicatorsSection:Toggle('ammo', false, function(value)
+    showAmmoIndicator = value
+end)
+
+local viewModelSection = menuTabs.Visuals:Section('viewmodel cosmetics', 1)
+
+viewModelSection:Toggle('no recoil', false, function(value)
+    noRecoilEnabled = value
+
+    if not value then
+        pcall(function()
+            restoreItemAttribute('ShootRecoil')
+        end)
+
+        recoilOverridden = false
+    end
+end)
+viewModelSection:Toggle('unlock all', false, function(value)
+    unlockAllEnabled = value
+
+    pcall(function()
+        if PlayerDataController and PlayerDataController.CurrentData then
+            PlayerDataController.CurrentData:Replicate('CosmeticInventory')
+            PlayerDataController.CurrentData:Replicate('WeaponInventory')
+        end
+    end)
+end)
+
+local hitSoundsEnabled = false
+local selectedHitSound = 'rust hs'
+local hitSoundVolume = 1
+local hitSoundSpeed = 1
+local hitSoundAssets = {
+    ['rust hs'] = 'rbxassetid://4764109000',
+    neverlose = 'rbxassetid://97643101798871',
+    sparkle = 'rbxassetid://110241936966089',
+    ['minecraft hit'] = 'rbxassetid://8766809464',
+    bonk = 'rbxassetid://5766898159',
+    osu = 'rbxassetid://7149255551',
+    ['among us'] = 'rbxassetid://5700183626',
+    bruh = 'rbxassetid://4578740568',
+    vine = 'rbxassetid://5332680810',
+    gamesense = 'rbxassetid://4817809188',
+    ['\u{c7a5}\u{cda9}\u{b3d9} \u{c655}\u{c871}\u{bc1c} \u{bcf4}\u{c308}'] = 'rbxassetid://85775332966635',
+}
+local hitSoundNames = {
+    'rust hs',
+    'neverlose',
+    'sparkle',
+    'minecraft hit',
+    'bonk',
+    'osu',
+    'among us',
+    'bruh',
+    'vine',
+    'gamesense',
+    '\u{c7a5}\u{cda9}\u{b3d9} \u{c655}\u{c871}\u{bc1c} \u{bcf4}\u{c308}',
+}
+local hitSoundsSection = menuTabs.Visuals:Section('hit sounds', 2)
+
+hitSoundsSection:Toggle('enable hit sound', false, function(value)
+    hitSoundsEnabled = value
+end)
+hitSoundsSection:Dropdown('hit sound style', hitSoundNames, 'rust hs', function(value)
+    selectedHitSound = value
+end)
+hitSoundsSection:Slider('volume', 0, 2, 1, 1, function(value)
+    hitSoundVolume = value
+end)
+hitSoundsSection:Slider('pitch (speed)', 1, 20, 10, 1, function(value)
+    hitSoundSpeed = math.clamp(value / 10, 0.1, 2)
+end)
+pcall(function()
+    local hitSoundSourceModule = LocalPlayer.PlayerScripts.Modules.ClientReplicatedClasses.ClientFighter.ClientItem.ClientViewModel
+
+    hitSoundSourceModule.ChildAdded:Connect(function(soundInstance)
+        if not hitSoundsEnabled then
+            return
+        end
+        if soundInstance:IsA('Sound') and soundInstance.SoundId ~= 'rbxassetid://16537449730' then
+            pcall(function()
+                local hitSoundAsset = hitSoundAssets[selectedHitSound] or hitSoundAssets['rust hs']
+
+                soundInstance.SoundId = hitSoundAsset
+                soundInstance.Pitch = hitSoundSpeed
+                soundInstance.Volume = 0
+
+                local hitSound = Instance.new('Sound')
+
+                hitSound.SoundId = hitSoundAsset
+                hitSound.Pitch = hitSoundSpeed
+                hitSound.Volume = hitSoundVolume
+                hitSound.Parent = game:GetService('SoundService')
+
+                hitSound:Play()
+                game:GetService('Debris'):AddItem(hitSound, 4)
+            end)
+        end
+    end)
+end)
+
+local movementSection = menuTabs.Misc:Section('movement', 1)
+
+movementSection:Toggle('Mobile Fly', false, function(value)
+    mobileFlyEnabled = value
+end)
+movementSection:Slider('Mobile Fly Speed', 1, 3000, 50, 0, function(value)
+    mobileFlySpeed = value
+end)
+movementSection:Toggle('PC Fly', false, function(value)
+    keyboardFlyEnabled = value
+end)
+movementSection:Slider('PC Fly Speed', 1, 10000, 50, 0, function(value)
+    keyboardFlySpeed = value
+end)
+movementSection:Toggle('Noclip Active', false, function(value)
+    noclipEnabled = value
+end)
+movementSection:Dropdown('Noclip Mode', {
+    'all walls',
+    'phong',
+}, 'all walls', function(value)
+    noclipMode = value
+end)
+
+local emoteSection = menuTabs.Misc:Section('emote hop', 2)
+
+emoteSection:Toggle('Emote Hop', false, function(value)
+    emoteHopEnabled = value
+
+    if value and LocalPlayer.Character then
+        playEmote(LocalPlayer.Character)
+    else
+        stopEmote()
+    end
+end)
+emoteSection:Slider('Emote Speed', 1, 40, 40, 0, function(value)
+    emoteSpeed = value
+
+    if currentEmoteTrack and currentEmoteTrack.IsPlaying then
+        currentEmoteTrack:AdjustSpeed(value)
+    end
+end)
+
+local deviceSection = menuTabs.Misc:Section('device spoofer', 2)
+
+deviceSection:Toggle('device spoofer', false, function(value)
+    deviceSpoofEnabled = value
+end)
+deviceSection:Dropdown('device selection', {
+    'vr',
+    'touch',
+    'gamepad',
+    'mousekeyboard',
+}, 'vr', function(value)
+    spoofedDevice = value
+end)
+
+local thirdPersonSection = menuTabs.Misc:Section('third person', 2)
+
+thirdPersonSection:Toggle('enabled', false, function(value)
+    thirdPersonEnabled = value
+
+    pcall(function()
+        local plr = cloneref(game:GetService('Players'))
+        local cameraController = require(plr.LocalPlayer.PlayerScripts.Controllers.CameraController)
+
+        if value then
+            cameraController.CameraState:_SetPOVState(cameraController.CameraState.States.ThirdPersonMirrored)
+        else
+            local cameraStates = cameraController.CameraState.States
+            local firstPersonState = cameraStates.FirstPerson or cameraStates.FirstPersonMirrored or cameraStates.Default
+
+            if firstPersonState then
+                cameraController.CameraState:_SetPOVState(firstPersonState)
+            end
+        end
+    end)
+end)
+
+local arcadeSection = menuTabs.Misc:Section('arcade servers', 2)
+
+arcadeSection:Toggle('automatically grab drops', false, function(value)
+    autoCollectDropsEnabled = value
+end)
+
+local menuSettingsSection = menuTabs['UI Settings']:Section('menu settings', 1)
+
+menuSettingsSection:Label('Press [RightShift] to Toggle UI')
+
+local themeDropdown = menuSettingsSection:Dropdown('Theme Color', {
+    'Sky Blue',
+    'Red',
+    'Lime Green',
+    'Purple',
+    'Orange',
+}, 'Sky Blue', function(colorName)
+    if colorName == 'Sky Blue' then
+        nexlib.accentclr = Color3.fromRGB(128, 213, 247)
+    elseif colorName == 'Red' then
+        nexlib.accentclr = Color3.fromRGB(255, 75, 75)
+    elseif colorName == 'Lime Green' then
+        nexlib.accentclr = Color3.fromRGB(75, 255, 75)
+    elseif colorName == 'Purple' then
+        nexlib.accentclr = Color3.fromRGB(180, 75, 255)
+    elseif colorName == 'Orange' then
+        nexlib.accentclr = Color3.fromRGB(255, 140, 0)
+    end
+end)
+
+menuSettingsSection:Button('Unload UI', function()
+    nexlib:Notification('Shutting Down', 'Goodbye!', 1.5)
+    task.wait(1.5)
+    mainWindow:Destroy()
+end)
+
+local configSection = menuTabs['UI Settings']:Section('Configuration', 2)
+local newConfigName = ''
+
+configSection:Input('Config Name', '', 'Input here...', function(value)
+    newConfigName = value
+end)
+configSection:Button('Create', function()
+    if newConfigName ~= '' then
+        nexlib:Notification('Config', 'Created: ' .. newConfigName, 1.5)
+    else
+        nexlib:Notification('Error', 'Please enter a config name!', 1.5)
+    end
+end)
+
+local selectedConfigName = ''
+local configNames = {
+    'Legitv1',
+    'Ragev2',
+}
+local configDropdown = configSection:Dropdown('Configs', configNames, '', function(value)
+    selectedConfigName = value
+end)
+
+configSection:Button('Load', function()
+    if selectedConfigName ~= '' then
+        nexlib:Notification('Config', 'Loaded: ' .. selectedConfigName, 1.5)
+    else
+        nexlib:Notification('Error', 'No config selected!', 1.5)
+    end
+end)
+configSection:Button('Save', function()
+    if selectedConfigName ~= '' then
+        nexlib:Notification('Config', 'Saved changes to: ' .. selectedConfigName, 1.5)
+    else
+        nexlib:Notification('Error', 'No config selected to save!', 1.5)
+    end
+end)
+configSection:Button('Delete', function()
+    if selectedConfigName ~= '' then
+        nexlib:Notification('Config', 'Deleted: ' .. selectedConfigName, 1.5)
+
+        selectedConfigName = ''
+    else
+        nexlib:Notification('Error', 'No config selected to delete!', 1.5)
+    end
+end)
+
+local indicatorsGui = Instance.new('ScreenGui')
+
+indicatorsGui.Name = 'HalmuIndicators'
+indicatorsGui.ResetOnSpawn = false
+indicatorsGui.IgnoreGuiInset = true
+indicatorsGui.DisplayOrder = 999
+indicatorsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+pcall(function()
+    indicatorsGui.Parent = game:GetService('CoreGui')
+end)
+
+if not indicatorsGui.Parent then
+    indicatorsGui.Parent = LocalPlayer:WaitForChild('PlayerGui')
+end
+
+local ragebotIndicator = Instance.new('TextLabel')
+
+ragebotIndicator.Name = 'RagebotIndicator'
+ragebotIndicator.BackgroundTransparency = 1
+ragebotIndicator.Size = UDim2.new(0, 420, 0, 22)
+ragebotIndicator.AnchorPoint = Vector2.new(0.5, 0)
+ragebotIndicator.Position = UDim2.new(0.5, 0, 0.5, 36)
+ragebotIndicator.Font = Enum.Font.Code
+ragebotIndicator.TextSize = 14
+ragebotIndicator.TextColor3 = Color3.fromRGB(245, 245, 245)
+ragebotIndicator.TextStrokeTransparency = 0
+ragebotIndicator.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+ragebotIndicator.Text = ''
+ragebotIndicator.Visible = false
+ragebotIndicator.Parent = indicatorsGui
+
+local ammoIndicator = Instance.new('TextLabel')
+
+ammoIndicator.Name = 'AmmoIndicator'
+ammoIndicator.BackgroundTransparency = 1
+ammoIndicator.Size = UDim2.new(0, 420, 0, 18)
+ammoIndicator.AnchorPoint = Vector2.new(0.5, 0)
+ammoIndicator.Position = UDim2.new(0.5, 0, 0.5, 52)
+ammoIndicator.Font = Enum.Font.Code
+ammoIndicator.TextSize = 11
+ammoIndicator.TextColor3 = Color3.fromRGB(245, 245, 245)
+ammoIndicator.TextStrokeTransparency = 0
+ammoIndicator.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+ammoIndicator.Text = ''
+ammoIndicator.Visible = false
+ammoIndicator.Parent = indicatorsGui
+
+local function getLocalAmmoStatus()
+    local currentAmmo, reserveAmmo, isReloading = nil, nil, false
+
+    pcall(function()
+        local playerScripts2 = LocalPlayer.PlayerScripts
+        local success, fighterController = pcall(require, playerScripts2.Controllers.FighterController)
+
+        if not success or not fighterController then
+            return
+        end
+
+        local localFighter = fighterController.LocalFighter
+
+        if not localFighter then
+            return
+        end
+
+        local equippedItem = localFighter.EquippedItem
+
+        if not equippedItem then
+            return
+        end
+
+        local function getItemProperty(key)
+            local readSucceeded, value = pcall(function()
+                if equippedItem.Get then
+                    return equippedItem:Get(key)
+                end
+
+                return equippedItem[key] or (equippedItem.Data and equippedItem.Data[key]) or (equippedItem.Info and equippedItem.Info[key])
+            end)
+
+            if readSucceeded then
+                return value
+            end
+
+            return nil
+        end
+
+        currentAmmo = getItemProperty('CurrentAmmo') or getItemProperty('Ammo') or getItemProperty('Bullets') or getItemProperty('MagazineAmmo')
+        reserveAmmo = getItemProperty('ReserveAmmo') or getItemProperty('StoredAmmo') or getItemProperty('Reserve') or getItemProperty('TotalAmmo') or getItemProperty('MaxAmmo') or getItemProperty('MaxBullets')
+
+        local reloadAttribute = getItemProperty('Reloading') or getItemProperty('IsReloading') or getItemProperty('Reload')
+
+        isReloading = reloadAttribute == true
+
+        if equippedItem.Info and type(equippedItem.Info) == 'table' then
+            if currentAmmo == nil then
+                currentAmmo = equippedItem.Info.CurrentAmmo or equippedItem.Info.Ammo
+            end
+            if reserveAmmo == nil then
+                reserveAmmo = equippedItem.Info.ReserveAmmo or equippedItem.Info.StoredAmmo or equippedItem.Info.MaxAmmo
+            end
+            if equippedItem.Info.Reloading == true or equippedItem.Info.IsReloading == true then
+                isReloading = true
+            end
+        end
+    end)
+
+    return currentAmmo, reserveAmmo, isReloading
+end
+
+RunService.RenderStepped:Connect(function()
+    local viewportSize = Camera.ViewportSize
+
+    if showRagebotIndicator and ragebotEnabled then
+        local targetDisplayName = 'idk'
+
+        if ragebotTargetPart and ragebotTargetPart.Parent then
+            local hitModel = ragebotTargetPart:FindFirstAncestorOfClass('Model') or ragebotTargetPart.Parent
+            local hitPlayer = Players:GetPlayerFromCharacter(hitModel)
+
+            if hitPlayer then
+                targetDisplayName = hitPlayer.DisplayName or hitPlayer.Name
+            elseif typeof(hitModel) == 'Instance' then
+                targetDisplayName = hitModel.Name
+            end
+        end
+
+        ragebotIndicator.Text = 'ragebot : ' .. tostring(targetDisplayName) .. '...'
+        ragebotIndicator.Position = UDim2.new(0.5, 0, 0.5, 36)
+        ragebotIndicator.Visible = true
+    else
+        ragebotIndicator.Visible = false
+    end
+    if showAmmoIndicator then
+        local currentAmmo, reserveAmmo, isReloading = getLocalAmmoStatus()
+        local ammoText
+
+        if isReloading or (typeof(currentAmmo) == 'number' and currentAmmo <= 0 and (reserveAmmo == nil or (typeof(reserveAmmo) == 'number' and reserveAmmo >= 0))) then
+            if isReloading or (typeof(currentAmmo) == 'number' and currentAmmo <= 0) then
+                if isReloading then
+                    ammoText = 'reloading'
+                elseif typeof(currentAmmo) == 'number' and typeof(reserveAmmo) == 'number' then
+                    ammoText = string.format('%d/%d', reserveAmmo, currentAmmo)
+                else
+                    ammoText = 'reloading'
+                end
+            end
+        end
+        if not ammoText then
+            if typeof(currentAmmo) == 'number' and typeof(reserveAmmo) == 'number' then
+                ammoText = string.format('%d/%d', reserveAmmo, currentAmmo)
+            elseif typeof(currentAmmo) == 'number' then
+                ammoText = tostring(currentAmmo)
+            else
+                ammoText = nil
+            end
+        end
+        if isReloading then
+            ammoText = 'reloading'
+        end
+        if ammoText then
+            ammoIndicator.Text = ammoText
+
+            local ammoIndicatorOffset = 52
+
+            if showRagebotIndicator and ragebotEnabled then
+                ammoIndicatorOffset = 52
+            end
+
+            ammoIndicator.Position = UDim2.new(0.5, 0, 0.5, ammoIndicatorOffset)
+            ammoIndicator.Visible = true
+        else
+            ammoIndicator.Visible = false
+        end
+    else
+        ammoIndicator.Visible = false
+    end
+end)
+RunService.RenderStepped:Connect(function()
+    if not autoCollectDropsEnabled then
+        return
+    end
+
+    local character = LocalPlayer.Character
+
+    if not character then
+        return
+    end
+
+    local rootPart = character:FindFirstChild('HumanoidRootPart')
+
+    if not rootPart then
+        return
+    end
+
+    local humanoid = character:FindFirstChild('Humanoid')
+    local needsHealth = humanoid and humanoid.Health < humanoid.MaxHealth
+
+    for _, obj in workspace:GetChildren()do
+        if obj.Name == '_drop' and obj:IsA('BasePart') then
+            if (collectHealthDrops and obj:FindFirstChild('Health') and needsHealth) or (collectAmmoDrops and obj:FindFirstChild('Ammo')) then
+                pcall(function()
+                    firetouchinterest(rootPart, obj, 0)
+                    firetouchinterest(rootPart, obj, 1)
+                end)
+            end
+        end
+    end
+end)
+RunService.Heartbeat:Connect(function()
+    if noShootCooldownEnabled then
+        pcall(function()
+            overrideItemAttribute('ShootCooldown', 0)
+        end)
+
+        shootCooldownOverridden = true
+    elseif shootCooldownOverridden then
+        pcall(function()
+            restoreItemAttribute('ShootCooldown')
+        end)
+
+        shootCooldownOverridden = false
+    end
+    if noRecoilEnabled then
+        pcall(function()
+            overrideItemAttribute('ShootRecoil', 0)
+        end)
+
+        recoilOverridden = true
+    elseif recoilOverridden then
+        pcall(function()
+            restoreItemAttribute('ShootRecoil')
+        end)
+
+        recoilOverridden = false
+    end
+    if instantProjectileReloadEnabled then
+        pcall(enableInstantProjectileReload)
+    elseif projectileReloadOverridden then
+        pcall(restoreProjectileReload)
+    end
+end)
+LocalPlayer.CharacterAdded:Connect(function(character)
+    if emoteHopEnabled then
+        character:WaitForChild('Humanoid')
+        task.wait(0.1)
+
+        if playEmote then
+            playEmote(character)
+        end
+    end
+    if thirdPersonEnabled then
+        task.defer(function()
+            pcall(function()
+                local plr = cloneref(game:GetService('Players'))
+                local cameraController = require(plr.LocalPlayer.PlayerScripts.Controllers.CameraController)
+
+                cameraController.CameraState:_SetPOVState(cameraController.CameraState.States.ThirdPersonMirrored)
+            end)
+        end)
+    end
+end)
+task.spawn(function()
+    while true do
+        task.wait(1)
+
+        if deviceSpoofEnabled then
+            pcall(function()
+                local remotesFolder = ReplicatedStorage:FindFirstChild('Remotes')
+                local replicationRemotes = remotesFolder and remotesFolder:FindFirstChild('Replication') or remotesFolder
+                local fighterRemotes = replicationRemotes and replicationRemotes:FindFirstChild('Fighter')
+                local setControlsRemote = fighterRemotes and fighterRemotes:FindFirstChild('SetControls')
+
+                if setControlsRemote and setControlsRemote:IsA('RemoteEvent') then
+                    if spoofedDevice == 'vr' then
+                        setControlsRemote:FireServer('VR')
+                    elseif spoofedDevice == 'touch' then
+                        setControlsRemote:FireServer('Touch')
+                    elseif spoofedDevice == 'gamepad' then
+                        setControlsRemote:FireServer('Gamepad')
+                    elseif spoofedDevice == 'mousekeyboard' then
+                        setControlsRemote:FireServer('MouseKeyboard')
+                    end
+                end
+            end)
+        end
+    end
+end)
+RunService.Stepped:Connect(function(deltaTime)
+    local localChar = LocalPlayer.Character
+
+    if not localChar then
+        return
+    end
+
+    local localRoot = localChar:FindFirstChild('HumanoidRootPart')
+    local localHum = localChar:FindFirstChild('Humanoid')
+
+    if not localRoot then
+        return
+    end
+    if noclipEnabled then
+        for _, part in pairs(localChar:GetDescendants())do
+            if part:IsA('BasePart') then
+                part.CanCollide = false
+            end
+        end
+    end
+    if mobileFlyEnabled or keyboardFlyEnabled then
+        if localHum then
+            localHum.PlatformStand = true
+        end
+
+        local flyVelocity = Vector3.zero
+
+        if mobileFlyEnabled then
+            if localHum and localHum.MoveDirection.Magnitude > 0 then
+                flyVelocity = Camera.CFrame.LookVector * mobileFlySpeed
+            end
+        elseif keyboardFlyEnabled then
+            local flyDirection = Vector3.zero
+
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                flyDirection = flyDirection + Camera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                flyDirection = flyDirection - Camera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                flyDirection = flyDirection - Camera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                flyDirection = flyDirection + Camera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                flyDirection = flyDirection + Vector3.new(0, 1, 0)
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                flyDirection = flyDirection - Vector3.new(0, 1, 0)
+            end
+            if flyDirection.Magnitude > 0 then
+                flyVelocity = flyDirection.Unit * keyboardFlySpeed
+            end
+        end
+
+        localRoot.AssemblyLinearVelocity = flyVelocity
+        localRoot.AssemblyAngularVelocity = Vector3.zero
+    else
+        if localHum and localHum.PlatformStand then
+            localHum.PlatformStand = false
+            localRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+end)
+
+local function resolveAnimationAsset(asset_id)
+    local success, loadedObjects = pcall(function()
+        return game:GetObjects(asset_id)
+    end)
+
+    if success and loadedObjects and #loadedObjects > 0 then
+        for i = 1, #loadedObjects do
+            if loadedObjects[i]:IsA('Animation') then
+                return loadedObjects[i].AnimationId
+            end
+        end
+    end
+
+    return asset_id
+end
+
+task.spawn(function()
+    local emoteAssetId = 'rbxassetid://92281817840531'
+
+    emoteAssetId = resolveAnimationAsset(emoteAssetId)
+    emoteAnimation = Instance.new('Animation')
+    emoteAnimation.AnimationId = emoteAssetId
+end)
+
+function playEmote(character)
+    if not emoteHopEnabled or not character or not emoteAnimation then
+        return
+    end
+
+    local humanoid = character:FindFirstChildWhichIsA('Humanoid')
+
+    if not humanoid then
+        return
+    end
+    if currentEmoteTrack then
+        currentEmoteTrack:Stop()
+
+        currentEmoteTrack = nil
+    end
+
+    local animator = humanoid:FindFirstChildOfClass('Animator') or humanoid
+    local animationLoaded, track = pcall(function()
+        return animator:LoadAnimation(emoteAnimation)
+    end)
+
+    if animationLoaded and track then
+        currentEmoteTrack = track
+        track.Priority = Enum.AnimationPriority.Action4
+
+        track:Play()
+        track:AdjustSpeed(emoteSpeed)
+        track.Stopped:Connect(function()
+            if emoteHopEnabled and LocalPlayer.Character == character then
+                playEmote(character)
+            end
+        end)
+    end
+end
+function stopEmote()
+    if currentEmoteTrack then
+        currentEmoteTrack:Stop()
+
+        currentEmoteTrack = nil
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+
+        if orbitDesyncEnabled then
+            local localRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+
+            if localRoot and not desyncOrigin then
+                desyncOrigin = localRoot.Position
+            end
+        else
+            desyncOrigin = nil
+        end
+    end
+end)
+
+local function getHitPart(character, hitboxName)
+    if not character then
+        return nil
+    end
+
+    local name = string.lower(tostring(hitboxName or 'head'))
+
+    if name == 'humanoidrootpart' then
+        return character:FindFirstChild('HumanoidRootPart')
+    elseif name == 'torso' then
+        return character:FindFirstChild('UpperTorso') or character:FindFirstChild('Torso') or character:FindFirstChild('HumanoidRootPart')
+    end
+
+    return character:FindFirstChild('Head') or character:FindFirstChild('HumanoidRootPart')
+end
+local function hasLineOfSight(hitPart, localChar)
+    if not hitPart then
+        return false
+    end
+
+    local offsetTargetPosition = Camera.CFrame.Position
+    local rayDirection = hitPart.Position - offsetTargetPosition
+    local raycastParams = RaycastParams.new()
+
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    raycastParams.FilterDescendantsInstances = {localChar, Camera}
+    raycastParams.IgnoreWater = true
+
+    local raycastResult = workspace:Raycast(offsetTargetPosition, rayDirection, raycastParams)
+
+    if not raycastResult then
+        return true
+    end
+
+    local hitCharacter = raycastResult.Instance and raycastResult.Instance:FindFirstAncestorOfClass('Model')
+    local targetCharacter = hitPart:FindFirstAncestorOfClass('Model')
+
+    return hitCharacter ~= nil and targetCharacter ~= nil and hitCharacter == targetCharacter
+end
+
+local fovGui = Instance.new('ScreenGui')
+
+fovGui.Name = 'HalmuFOV'
+fovGui.ResetOnSpawn = false
+fovGui.IgnoreGuiInset = true
+fovGui.DisplayOrder = 50
+
+pcall(function()
+    fovGui.Parent = game:GetService('CoreGui')
+end)
+
+if not fovGui.Parent then
+    fovGui.Parent = LocalPlayer:WaitForChild('PlayerGui')
+end
+
+local function createFovCircle(name, color)
+    local fovFrame = Instance.new('Frame')
+
+    fovFrame.Name = name
+    fovFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    fovFrame.BackgroundTransparency = 1
+    fovFrame.BorderSizePixel = 0
+    fovFrame.Visible = false
+    fovFrame.Parent = fovGui
+
+    local corner = Instance.new('UICorner')
+
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = fovFrame
+
+    local notificationStroke = Instance.new('UIStroke')
+
+    notificationStroke.Thickness = 1.5
+    notificationStroke.Color = color
+    notificationStroke.Transparency = 0.15
+    notificationStroke.Parent = fovFrame
+
+    return fovFrame
+end
+
+local aimbotFovCircle = createFovCircle('AimbotFOV', Color3.fromRGB(255, 255, 255))
+local silentFovCircle = createFovCircle('SilentAimFOV', Color3.fromRGB(255, 80, 80))
+
+local function updateFovCircle(fovFrame, mousePos, radius, visible)
+    if not visible then
+        fovFrame.Visible = false
+
+        return
+    end
+
+    local clampedRadius = math.max(tonumber(radius) or 50, 10)
+
+    fovFrame.Size = UDim2.fromOffset(clampedRadius * 2, clampedRadius * 2)
+    fovFrame.Position = UDim2.fromOffset(mousePos.X, mousePos.Y)
+    fovFrame.Visible = true
+end
+
+pcall(function()
+    local FighterController = require(LocalPlayer.PlayerScripts.Controllers.FighterController)
+    local LocalFighter = FighterController.LocalFighter
+
+    if LocalFighter and LocalFighter.GetMouseLocation then
+        local origGetMouseLoc = LocalFighter.GetMouseLocation
+        local wrap = newcclosure or function(f)
+            return f
+        end
+
+        LocalFighter.GetMouseLocation = wrap(function(...)
+            if silentAimEnabled and silentAimTarget then
+                local screenPos = Camera:WorldToScreenPoint(silentAimTarget.Position)
+
+                return Vector2.new(screenPos.X, screenPos.Y)
+            end
+
+            return origGetMouseLoc(...)
+        end)
+    end
+end)
+RunService.RenderStepped:Connect(function(deltaTime)
+    local localChar = LocalPlayer.Character
+    local mousePos = UserInputService:GetMouseLocation()
+
+    Camera = workspace.CurrentCamera or Camera
+
+    updateFovCircle(aimbotFovCircle, mousePos, aimbotFovRadius, showAimbotFov == true)
+    updateFovCircle(silentFovCircle, mousePos, silentAimFovRadius, showSilentAimFov == true)
+
+    silentAimTarget = nil
+
+    if silentAimEnabled and localChar then
+        local bestDist = math.huge
+        local camPos = Camera.CFrame.Position
+        local lookVec = Camera.CFrame.LookVector
+
+        for _, otherPlayer in ipairs(Players:GetPlayers())do
+            if otherPlayer ~= LocalPlayer and not isTeammate(otherPlayer) then
+                local targetCharacter = otherPlayer.Character
+
+                if targetCharacter then
+                    local targetHumanoid = targetCharacter:FindFirstChildOfClass('Humanoid')
+
+                    if targetHumanoid and targetHumanoid.Health > 0 and not targetCharacter:FindFirstChildOfClass('ForceField') then
+                        local hitPart = getHitPart(targetCharacter, silentAimHitPart)
+
+                        if hitPart then
+                            local screenPos, onScreen = Camera:WorldToViewportPoint(hitPart.Position)
+
+                            if onScreen then
+                                local screenVec = Vector2.new(screenPos.X, screenPos.Y)
+                                local mag = (screenVec - mousePos).Magnitude
+
+                                if mag <= silentAimFovRadius and mag < bestDist then
+                                    local toTarget = (hitPart.Position - camPos)
+
+                                    if toTarget.Magnitude > 0 and lookVec:Dot(toTarget.Unit) > 0 then
+                                        if (not silentWallCheck) or hasLineOfSight(hitPart, localChar) then
+                                            bestDist = mag
+                                            silentAimTarget = hitPart
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    local shouldAim = aimbotEnabled and localChar and ((not aimbotRequireRMB) or UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2))
+
+    if shouldAim then
+        local closestPart = nil
+        local closestDist = aimbotFovRadius
+
+        for _, player in pairs(Players:GetPlayers())do
+            if player ~= LocalPlayer and player.Character and not isTeammate(player) then
+                local char = player.Character
+                local humanoid = char:FindFirstChild('Humanoid')
+
+                if humanoid and humanoid.Health > 0 then
+                    local hitPart = getHitPart(char, aimbotHitPart)
+
+                    if hitPart then
+                        local screenPoint, isOnScreen = Camera:WorldToViewportPoint(hitPart.Position)
+
+                        if isOnScreen then
+                            local distToMouse = (Vector2.new(screenPoint.X, screenPoint.Y) - mousePos).Magnitude
+
+                            if distToMouse < closestDist then
+                                if (not aimbotWallCheck) or hasLineOfSight(hitPart, localChar) then
+                                    closestDist = distToMouse
+                                    closestPart = hitPart
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if closestPart then
+            local targetScreen = Camera:WorldToViewportPoint(closestPart.Position)
+            local deltaX = (targetScreen.X - mousePos.X) / math.max(aimbotSmoothness, 1)
+            local deltaY = (targetScreen.Y - mousePos.Y) / math.max(aimbotSmoothness, 1)
+
+            if mousemoverel then
+                mousemoverel(deltaX, deltaY)
+            end
+        end
+    end
+end)
+RunService.Heartbeat:Connect(function()
+    local localChar = LocalPlayer.Character
+    local localRoot = localChar and localChar:FindFirstChild('HumanoidRootPart')
+    local localHum = localChar and localChar:FindFirstChild('Humanoid')
+
+    if not localRoot or (localHum and localHum.Health <= 0) then
+        return
+    end
+    if pullEnemiesEnabled then
+        for _, player in pairs(Players:GetPlayers())do
+            if player ~= LocalPlayer and player.Character then
+                local otherRoot = player.Character:FindFirstChild('HumanoidRootPart')
+                local otherHum = player.Character:FindFirstChild('Humanoid')
+
+                if otherRoot and otherHum and otherHum.Health > 0 then
+                    otherRoot.CFrame = localRoot.CFrame * CFrame.new(0, 0, -3)
+                    otherRoot.AssemblyLinearVelocity = Vector3.zero
+                end
+            end
+        end
+
+        local equippedTool = localChar:FindFirstChildOfClass('Tool')
+
+        if equippedTool then
+            equippedTool:Activate()
+        end
+    end
+    if orbitDesyncEnabled then
+        return
+    end
+    if voidHeightLockEnabled then
+        localRoot.CFrame = CFrame.new(localRoot.Position.X, voidHeight, localRoot.Position.Z)
+
+        return
+    end
+end)
+
+local espGui = Instance.new('ScreenGui')
+
+espGui.Name = 'HalmuESP'
+espGui.ResetOnSpawn = false
+espGui.IgnoreGuiInset = true
+espGui.DisplayOrder = 40
+
+pcall(function()
+    espGui.Parent = game:GetService('CoreGui')
+end)
+
+if not espGui.Parent then
+    espGui.Parent = LocalPlayer:WaitForChild('PlayerGui')
+end
+
+local function getWeaponInfo(player)
+    local weaponName, ammoDisplay = nil, nil
+
+    pcall(function()
+        local fighterController = FighterController
+
+        if not fighterController then
+            local success, loadedFighterController = pcall(require, LocalPlayer.PlayerScripts.Controllers.FighterController)
+
+            if success then
+                fighterController = loadedFighterController
+                FighterController = loadedFighterController
+            end
+        end
+        if not fighterController then
+            return
+        end
+
+        local fighter = nil
+
+        if type(fighterController.GetFighter) == 'function' then
+            fighter = fighterController:GetFighter(player)
+        end
+        if not fighter and player == LocalPlayer then
+            fighter = fighterController.LocalFighter
+        end
+        if not fighter then
+            return
+        end
+
+        local equippedItem = fighter.EquippedItem
+
+        if not equippedItem then
+            local char = player.Character
+            local equippedTool = char and char:FindFirstChildOfClass('Tool')
+
+            if equippedTool then
+                weaponName = equippedTool.Name
+            end
+
+            return
+        end
+
+        local function getItemProperty(key)
+            local readSucceeded, value = pcall(function()
+                if equippedItem.Get then
+                    return equippedItem:Get(key)
+                end
+
+                return equippedItem[key] or (equippedItem.Data and equippedItem.Data[key]) or (equippedItem.Info and equippedItem.Info[key])
+            end)
+
+            if readSucceeded then
+                return value
+            end
+
+            return nil
+        end
+
+        local currentAmmo = getItemProperty('CurrentAmmo') or getItemProperty('Ammo') or getItemProperty('Bullets') or getItemProperty('MagazineAmmo')
+        local reserveAmmo = getItemProperty('ReserveAmmo') or getItemProperty('StoredAmmo') or getItemProperty('Reserve') or getItemProperty('TotalAmmo')
+        local isReloading = getItemProperty('Reloading') or getItemProperty('IsReloading')
+
+        if equippedItem.Info and type(equippedItem.Info) == 'table' then
+            if currentAmmo == nil then
+                currentAmmo = equippedItem.Info.CurrentAmmo or equippedItem.Info.Ammo
+            end
+            if reserveAmmo == nil then
+                reserveAmmo = equippedItem.Info.ReserveAmmo or equippedItem.Info.StoredAmmo
+            end
+            if equippedItem.Info.Reloading == true or equippedItem.Info.IsReloading == true then
+                isReloading = true
+            end
+        end
+
+        local reloadCooldown = rawget(equippedItem, '_reload_cooldown')
+
+        if type(reloadCooldown) == 'number' and reloadCooldown > tick() then
+            isReloading = true
+        end
+
+        local name = equippedItem.Name or getItemProperty('Name') or 'weapon'
+
+        weaponName = (isReloading == true) and '*Reloading*' or tostring(name)
+
+        if typeof(currentAmmo) == 'number' and typeof(reserveAmmo) == 'number' then
+            ammoDisplay = string.format('%d/%d', math.floor(currentAmmo + 0.5), math.floor(reserveAmmo + 0.5))
+        elseif typeof(currentAmmo) == 'number' then
+            ammoDisplay = tostring(math.floor(currentAmmo + 0.5))
+        end
+    end)
+
+    if not weaponName then
+        pcall(function()
+            local char = player.Character
+            local equippedTool = char and char:FindFirstChildOfClass('Tool')
+
+            if equippedTool then
+                weaponName = equippedTool.Name
+            end
+        end)
+    end
+    if not weaponName then
+        return nil
+    end
+    if ammoDisplay and ammoDisplay ~= '' then
+        return weaponName .. ' | ' .. ammoDisplay
+    end
+
+    return weaponName
+end
+
+local espDrawings = {}
+
+local function createEspEntry(player)
+    if espDrawings[player] then
+        return
+    end
+
+    local boxFrame = Instance.new('Frame')
+
+    boxFrame.Name = 'Box'
+    boxFrame.BackgroundTransparency = 1
+    boxFrame.BorderSizePixel = 0
+    boxFrame.Visible = false
+    boxFrame.Parent = espGui
+
+    local boxStroke = Instance.new('UIStroke')
+
+    boxStroke.Thickness = 1
+    boxStroke.Color = Color3.fromRGB(255, 70, 70)
+    boxStroke.Parent = boxFrame
+
+    local name = Instance.new('TextLabel')
+
+    name.Name = 'Name'
+    name.BackgroundTransparency = 1
+    name.Font = Enum.Font.Code
+    name.TextSize = 13
+    name.TextColor3 = Color3.fromRGB(255, 255, 255)
+    name.TextStrokeTransparency = 0
+    name.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    name.TextXAlignment = Enum.TextXAlignment.Center
+    name.Size = UDim2.new(0, 160, 0, 16)
+    name.Visible = false
+    name.Parent = espGui
+
+    local healthBg = Instance.new('Frame')
+
+    healthBg.Name = 'HealthBg'
+    healthBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    healthBg.BackgroundTransparency = 0.35
+    healthBg.BorderSizePixel = 0
+    healthBg.Visible = false
+    healthBg.Parent = espGui
+
+    local healthBar = Instance.new('Frame')
+
+    healthBar.Name = 'HealthBar'
+    healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    healthBar.BorderSizePixel = 0
+    healthBar.Visible = false
+    healthBar.Parent = espGui
+
+    local weaponName = Instance.new('TextLabel')
+
+    weaponName.Name = 'Weapon'
+    weaponName.BackgroundTransparency = 1
+    weaponName.Font = Enum.Font.Code
+    weaponName.TextSize = 12
+    weaponName.TextColor3 = Color3.fromRGB(220, 220, 220)
+    weaponName.TextStrokeTransparency = 0
+    weaponName.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    weaponName.TextXAlignment = Enum.TextXAlignment.Center
+    weaponName.Size = UDim2.new(0, 180, 0, 14)
+    weaponName.Visible = false
+    weaponName.Parent = espGui
+    espDrawings[player] = {
+        Box = boxFrame,
+        BoxStroke = boxStroke,
+        Name = name,
+        HealthBg = healthBg,
+        HealthBar = healthBar,
+        Weapon = weaponName,
+    }
+end
+local function destroyEspEntry(player)
+    if espDrawings[player] then
+        for k, d in pairs(espDrawings[player])do
+            if typeof(d) == 'Instance' then
+                pcall(function()
+                    d:Destroy()
+                end)
+            end
+        end
+
+        espDrawings[player] = nil
+    end
+end
+
+for _, plr in pairs(Players:GetPlayers())do
+    if plr ~= LocalPlayer then
+        createEspEntry(plr)
+    end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    if plr ~= LocalPlayer then
+        createEspEntry(plr)
+    end
+end)
+Players.PlayerRemoving:Connect(destroyEspEntry)
+RunService.RenderStepped:Connect(function()
+    Camera = workspace.CurrentCamera or Camera
+
+    local localRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+
+    for player, drawings in pairs(espDrawings)do
+        local boxFrame, name, healthBg, healthBar = drawings.Box, drawings.Name, drawings.HealthBg, drawings.HealthBar
+        local boxStroke = drawings.BoxStroke
+        local char = player.Character
+        local rootPart = char and char:FindFirstChild('HumanoidRootPart')
+        local humanoid = char and char:FindFirstChildOfClass('Humanoid')
+        local headOrHitbox = char and (char:FindFirstChild('Head') or char:FindFirstChild('HitboxHead') or rootPart)
+        local weaponName = drawings.Weapon
+
+        local function hideEspDrawing()
+            boxFrame.Visible = false
+            name.Visible = false
+            healthBg.Visible = false
+            healthBar.Visible = false
+
+            if weaponName then
+                weaponName.Visible = false
+            end
+        end
+
+        if espEnabled and rootPart and humanoid and headOrHitbox and humanoid.Health > 0 then
+            local topPos = headOrHitbox.Position + Vector3.new(0, 0.6, 0)
+            local bottomPos = rootPart.Position - Vector3.new(0, 3, 0)
+            local topScreen, topOnScreen = Camera:WorldToViewportPoint(topPos)
+            local bottomScreen, bottomOnScreen = Camera:WorldToViewportPoint(bottomPos)
+            local rootScreen, rootOnScreen = Camera:WorldToViewportPoint(rootPart.Position)
+
+            if (rootOnScreen or topOnScreen or bottomOnScreen) and rootScreen.Z > 0 then
+                local boxHeight = math.abs(topScreen.Y - bottomScreen.Y)
+
+                if boxHeight < 8 then
+                    boxHeight = 40
+                end
+
+                local boxWidth = boxHeight * 0.55
+                local boxX = rootScreen.X - boxWidth / 2
+                local boxY = topScreen.Y
+
+                if espBoxEnabled then
+                    boxFrame.Size = UDim2.fromOffset(boxWidth, boxHeight)
+                    boxFrame.Position = UDim2.fromOffset(boxX, boxY)
+
+                    local teamColor = isTeammate(player) and Color3.fromRGB(80, 160, 255) or Color3.fromRGB(255, 70, 70)
+
+                    if boxStroke then
+                        boxStroke.Color = teamColor
+                    end
+
+                    boxFrame.Visible = true
+                else
+                    boxFrame.Visible = false
+                end
+                if espNameEnabled then
+                    local distText = ''
+
+                    if localRoot then
+                        distText = ' [' .. math.floor((rootPart.Position - localRoot.Position).Magnitude) .. 'm]'
+                    end
+
+                    name.Text = (player.DisplayName or player.Name) .. distText
+                    name.Position = UDim2.fromOffset(rootScreen.X - 80, boxY - 16)
+                    name.TextColor3 = isTeammate(player) and Color3.fromRGB(120, 180, 255) or Color3.fromRGB(255, 255, 255)
+                    name.Visible = true
+                else
+                    name.Visible = false
+                end
+                if espHealthEnabled then
+                    local healthPct = math.clamp(humanoid.Health / math.max(humanoid.MaxHealth, 1), 0, 1)
+
+                    healthBg.Size = UDim2.fromOffset(3, boxHeight)
+                    healthBg.Position = UDim2.fromOffset(boxX - 6, boxY)
+                    healthBg.Visible = true
+
+                    local barHeight = math.max(boxHeight * healthPct, 1)
+
+                    healthBar.Size = UDim2.fromOffset(3, barHeight)
+                    healthBar.Position = UDim2.fromOffset(boxX - 6, boxY + (boxHeight - barHeight))
+                    healthBar.BackgroundColor3 = Color3.fromHSV(healthPct * 0.33, 1, 1)
+                    healthBar.Visible = true
+                else
+                    healthBg.Visible = false
+                    healthBar.Visible = false
+                end
+                if espWeaponEnabled and weaponName then
+                    local weaponDisplay = getWeaponInfo(player)
+
+                    if weaponDisplay and weaponDisplay ~= '' then
+                        weaponName.Text = weaponDisplay
+                        weaponName.Position = UDim2.fromOffset(rootScreen.X - 90, boxY + boxHeight + 2)
+                        weaponName.TextColor3 = isTeammate(player) and Color3.fromRGB(140, 190, 255) or Color3.fromRGB(220, 220, 220)
+                        weaponName.Visible = true
+                    else
+                        weaponName.Visible = false
+                    end
+                elseif weaponName then
+                    weaponName.Visible = false
+                end
+            else
+                hideEspDrawing()
+            end
+        else
+            hideEspDrawing()
+        end
+    end
+end)
+
+local mouseHeld = false
+local nextClickTime = 0
+local rayParams = RaycastParams.new()
+
+rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+local function isCrosshairEnemy()
+    local char = LocalPlayer.Character
+
+    if not char then
+        return false
+    end
+
+    rayParams.FilterDescendantsInstances = {char, Camera}
+
+    local rayResult = workspace:Raycast(Camera.CFrame.Position, Camera.CFrame.LookVector * 400, rayParams)
+
+    if rayResult and rayResult.Instance then
+        local hitModel = rayResult.Instance:FindFirstAncestorOfClass('Model')
+
+        if hitModel and hitModel ~= char then
+            local humanoid = hitModel:FindFirstChildOfClass('Humanoid')
+
+            if humanoid and humanoid.Health > 0 then
+                local hitPlayer = Players:GetPlayerFromCharacter(hitModel)
+
+                if hitPlayer and isTeammate(hitPlayer) then
+                    return false
+                end
+
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+RunService.RenderStepped:Connect(function()
+    if not triggerbotEnabled then
+        if mouseHeld then
+            pcall(mouse1release)
+
+            mouseHeld = false
+        end
+
+        return
+    end
+    if mouse1click and (isrbxactive or iswindowactive) and (isrbxactive() or iswindowactive()) then
+        if isCrosshairEnemy() then
+            if nextClickTime < tick() then
+                if mouseHeld then
+                    pcall(mouse1release)
+
+                    nextClickTime = tick() + 0.07
+                else
+                    pcall(mouse1press)
+                end
+
+                mouseHeld = not mouseHeld
+            end
+        else
+            if mouseHeld then
+                pcall(mouse1release)
+
+                mouseHeld = false
+            end
+        end
+    end
+end)
+
+local lighting = game:GetService('Lighting')
+local savedLighting = {}
+local shaderBlur = Instance.new('BlurEffect')
+
+shaderBlur.Name = 'ShaderBlur'
+shaderBlur.Size = 6
+
+local shaderColorCorrection = Instance.new('ColorCorrectionEffect')
+
+shaderColorCorrection.Name = 'ShaderColor'
+shaderColorCorrection.Saturation = -0.35
+
+local function enableShader()
+    savedLighting = {
+        Ambient = lighting.Ambient,
+        Brightness = lighting.Brightness,
+        OutdoorAmbient = lighting.OutdoorAmbient,
+        ShadowSoftness = lighting.ShadowSoftness,
+        TimeOfDay = lighting.TimeOfDay,
+        ColorShift_Top = lighting.ColorShift_Top,
+        ColorShift_Bottom = lighting.ColorShift_Bottom,
+    }
+    lighting.Ambient = Color3.fromRGB(94, 99, 188)
+    lighting.Brightness = 3.5
+    lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+    lighting.ShadowSoftness = 2.5
+    lighting.TimeOfDay = '00:30:00'
+    lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+    lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
+    shaderBlur.Parent = lighting
+    shaderColorCorrection.Parent = lighting
+end
+local function disableShader()
+    if next(savedLighting) then
+        lighting.Ambient = savedLighting.Ambient
+        lighting.Brightness = savedLighting.Brightness
+        lighting.OutdoorAmbient = savedLighting.OutdoorAmbient
+        lighting.ShadowSoftness = savedLighting.ShadowSoftness
+        lighting.TimeOfDay = savedLighting.TimeOfDay
+        lighting.ColorShift_Top = savedLighting.ColorShift_Top
+        lighting.ColorShift_Bottom = savedLighting.ColorShift_Bottom
+    end
+
+    shaderBlur.Parent = nil
+    shaderColorCorrection.Parent = nil
+end
+
+local lastShaderState = false
+
+RunService.Heartbeat:Connect(function()
+    if shaderEnabled ~= lastShaderState then
+        lastShaderState = shaderEnabled
+
+        if shaderEnabled then
+            enableShader()
+        else
+            disableShader()
+        end
+    end
+end)
