@@ -3333,7 +3333,7 @@ local function restoreProjectileReload()
     projectileReloadOverridden = false
 end
 
-local mainWindow = nexlib:Window('\u{d560}\u{bb34}\u{bc1c}\u{d06c} free')
+local mainWindow = nexlib:Window('\u{d560}\u{bb34}\u{bc1c}\u{d06c} free | 개좆밥병신스크립트Cracked')
 local menuTabs = {
     Combat = mainWindow:Tab('Combat'),
     Visuals = mainWindow:Tab('Visuals'),
