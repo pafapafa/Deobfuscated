@@ -1,3 +1,5 @@
+--!nocheck
+
 local arguments = table.pack(...)
 local sharedEnv = getgenv and getgenv() or _G
 local previous = rawget(sharedEnv, 'Unnamed Enhancements')
